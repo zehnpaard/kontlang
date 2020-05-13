@@ -13,4 +13,4 @@ f : e = expr; EOF { e }
 expr :
 | n = INT; { Exp.Int n }
 | s = VAR; { Exp.Var s }
-| LPAREN; es = nonempty_list (expr); RPAREN { Exp.Call es }
+| LPAREN; e = expr; es = list (expr); RPAREN { Exp.Call (e, es) }

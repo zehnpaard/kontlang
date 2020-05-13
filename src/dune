@@ -1,2 +1,5 @@
+(menhir
+  (modules parser))
+ 
 (library
   (name kontlang))

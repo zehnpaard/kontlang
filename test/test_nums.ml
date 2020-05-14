@@ -13,11 +13,16 @@ let test_sub_many _ =
   let s = "(- 15 1 2 3 4 5)" in
   assert_equal (Execute.eval_string s) "0"
 
+let test_many _ =
+  let s = "(- (* 5 3) 1 2 3 (+ 2 2) 5)" in
+  assert_equal (Execute.eval_string s) "0"
+
 let suite =
   "ExampleTestList" >::: [
     "test_sum1" >:: test_sum1
   ; "test_sum_many" >:: test_sum_many
   ; "test_sub_many" >:: test_sub_many
+  ; "test_many" >:: test_many
   ]
 
 let () =

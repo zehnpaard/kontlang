@@ -31,6 +31,22 @@ let test_eq_many_false _ =
   let s = "(= 0 0 0 3 0)" in
   assert_equal (Execute.eval_string s) "false"
 
+let test_neq2 _ =
+  let s = "(!= 0 1)" in
+  assert_equal (Execute.eval_string s) "true"
+
+let test_neq2_false _ =
+  let s = "(!= 2 2)" in
+  assert_equal (Execute.eval_string s) "false"
+
+let test_neq_many _ =
+  let s = "(!= 1 5 3 (* 3 0) 4)" in
+  assert_equal (Execute.eval_string s) "true"
+
+let test_neq_many_false _ =
+  let s = "(!= 0 1 2 3 0)" in
+  assert_equal (Execute.eval_string s) "false"
+
 let test_and0 _ =
   let s = "(and)" in
   assert_equal (Execute.eval_string s) "true"
@@ -61,6 +77,10 @@ let suite =
   ; "test_eq2_false" >:: test_eq2_false
   ; "test_eq_many" >:: test_eq_many
   ; "test_eq_many_false" >:: test_eq_many_false
+  ; "test_neq2" >:: test_neq2
+  ; "test_neq2_false" >:: test_neq2_false
+  ; "test_neq_many" >:: test_neq_many
+  ; "test_neq_many_false" >:: test_neq_many_false
   ; "test_and0" >:: test_and0
   ; "test_and1" >:: test_and1
   ; "test_and2" >:: test_and2

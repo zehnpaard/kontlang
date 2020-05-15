@@ -25,6 +25,19 @@ let num_bool_op s op =
   in
   Val.Op (s, f)
 
+let bool_bool_op s op =
+  let g = function
+  | Val.Bool b -> b
+  | _ -> failwith @@ "Non-boolean value passed to bool op " ^ s
+  in
+  let f xs = Val.Bool (List.fold_left (fun x y -> op x @@ g y) true xs) in
+  Val.Op (s, f)
+
+let not_op = function
+  | [Val.Bool b] -> Val.Bool (not b)
+  | [_] -> failwith "Non-boolean value passed to bool uniop not_op"
+  | _ -> failwith "Bool uniop not_op applied to more than one arg"
+
 let builtins =
 [ "+", num_num_op "+" (+)
 ; "-", num_num_op "-" (-)
@@ -38,6 +51,9 @@ let builtins =
 ; ">=", num_bool_op ">=" (>=)
 ; "<", num_bool_op "<" (<)
 ; "<=", num_bool_op "<=" (<=)
+; "and", bool_bool_op "and" (&&)
+; "or", bool_bool_op "or" (||)
+; "not", Val.Op("not_op", not_op)
 ]
 
 let load env = Env.extend_list builtins env

@@ -33,6 +33,7 @@ let builtins =
 ; "true", Val.Bool true
 ; "false", Val.Bool false
 ; "=", num_bool_op "=" (=)
+; "!=", num_bool_op "!=" (!=)
 ; ">", num_bool_op ">" (>)
 ; ">=", num_bool_op ">=" (>=)
 ; "<", num_bool_op "<" (<)

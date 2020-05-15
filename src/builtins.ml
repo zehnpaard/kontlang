@@ -14,6 +14,8 @@ let builtins =
 ; "-", num_num_op "-" (-)
 ; "*", num_num_op "*" ( * )
 ; "/", num_num_op "/" (/)
+; "true", Val.Bool true
+; "false", Val.Bool false
 ]
 
 let load env = Env.extend_list builtins env

@@ -25,6 +25,22 @@ let num_bool_op s op =
   in
   Val.Op (s, f)
 
+let not_equal_op =
+  let g = function
+  | Val.Int n -> n
+  | _ -> failwith "Non-numeric value passed to numeric op !="
+  in
+  let rec h = function
+  | [] | [_] -> Val.Bool true
+  | x::y::ys -> if x != y then h @@ y::ys else Val.Bool false
+  in
+  let f xs = match List.sort compare @@ List.map g xs with
+  | [] -> failwith "NumBool op != applied to empty list"
+  | [_] -> failwith "NumBool op != applied to one arg"
+  | ys -> h ys
+  in
+  Val.Op ("!=", f)
+
 let bool_bool_op s op =
   let g = function
   | Val.Bool b -> b
@@ -46,7 +62,7 @@ let builtins =
 ; "true", Val.Bool true
 ; "false", Val.Bool false
 ; "=", num_bool_op "=" (=)
-; "!=", num_bool_op "!=" (!=)
+; "!=", not_equal_op
 ; ">", num_bool_op ">" (>)
 ; ">=", num_bool_op ">=" (>=)
 ; "<", num_bool_op "<" (<)

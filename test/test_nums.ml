@@ -18,7 +18,7 @@ let test_many _ =
   assert_equal (Execute.eval_string s) "0"
 
 let suite =
-  "ExampleTestList" >::: [
+  "NumTestList" >::: [
     "test_sum1" >:: test_sum1
   ; "test_sum_many" >:: test_sum_many
   ; "test_sub_many" >:: test_sub_many

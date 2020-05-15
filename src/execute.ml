@@ -7,6 +7,7 @@ let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
 | Exp.Call(e, es) -> Eval(env, Cont.Call(es, []) :: cont, e)
+| Exp.If(e1, e2, e3) -> Eval(env, Cont.If(e2, e3) :: cont, e1)
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
@@ -14,6 +15,9 @@ let apply_cont env cont v = match cont with
   | Val.Op(_, fn) :: vs' -> ApplyCont(env, cont', (fn vs'))
   | _ -> failwith "Calling non-op in operator position")
 | Cont.Call(e::es, vs) :: cont' -> Eval(env, Cont.Call(es, v::vs) :: cont', e)
+| Cont.If(e2, e3) :: cont' -> (match v with
+  | Val.Bool b -> Eval(env, cont', if b then e2 else e3)
+  | _ -> failwith "Non-boolean in condition position of If expression")
 
 let rec trampoline = function
 | Done v -> v

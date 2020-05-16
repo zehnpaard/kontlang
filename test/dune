@@ -1,3 +1,5 @@
 (tests
-  (names test_nums)
+  (names
+    test_nums
+    test_bool)
   (libraries ounit2 kontlang))

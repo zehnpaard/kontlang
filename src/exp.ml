@@ -2,6 +2,7 @@ type t =
 | Int of int
 | Var of string
 | Call of t * t list
+| If of t * t * t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -11,3 +12,8 @@ let rec to_string = function
     let fn = to_string e in
     let args = List.map to_string es |> String.concat " " in
     Printf.sprintf "(%s %s)" fn args
+| If (e1, e2, e3) ->
+    let s1 = (to_string e1) in
+    let s2 = (to_string e2) in
+    let s3 = (to_string e3) in
+    Printf.sprintf "(if %s %s %s)" s1 s2 s3

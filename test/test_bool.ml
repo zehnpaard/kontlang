@@ -67,6 +67,10 @@ let test_and_many_false _ =
   let s = "(and (>= 3 1 1) (< 0 3) false (<= 1 2 3 3 5))" in
   assert_equal (Execute.eval_string s) "false"
 
+let test_if _ =
+  let s = "(if (> 0 5) 1 2)" in
+  assert_equal (Execute.eval_string s) "2"
+
 let suite =
   "BoolTestList" >::: [
     "test_true" >:: test_true
@@ -86,6 +90,7 @@ let suite =
   ; "test_and2" >:: test_and2
   ; "test_and_many" >:: test_and_many
   ; "test_and_many_false" >:: test_and_many_false
+  ; "test_if" >:: test_if
   ]
 
 let () =

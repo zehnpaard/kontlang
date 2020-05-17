@@ -10,5 +10,6 @@ rule f = parse
   | "(" { Parser.LPAREN }
   | ")" { Parser.RPAREN }
   | "if" { Parser.IF }
+  | "let" { Parser.LET }
   | variable as s { Parser.VAR s }
   | eof { EOF }

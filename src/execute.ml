@@ -22,9 +22,10 @@ let apply_cont env cont v = match cont with
   | _ -> failwith "Non-boolean in condition position of If expression")
 | Cont.Let(s, [], vvs, e2) :: cont' ->
     let env' = Env.extend_list (List.rev ((s, v)::vvs)) env in
-    Eval(env', cont', e2)
+    Eval(env', Cont.Env::cont', e2)
 | Cont.Let(s, (s', e')::ves, vvs, e2) :: cont' ->
     Eval(env, Cont.Let(s', ves, (s, v)::vvs, e2) :: cont', e')
+| Cont.Env :: cont' -> ApplyCont (Env.pop env, cont', v)
 
 let rec trampoline = function
 | Done v -> v

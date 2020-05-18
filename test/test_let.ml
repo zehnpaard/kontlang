@@ -17,12 +17,22 @@ let test_let4 _ =
   let s = "(let [x 10] (let [y 5] (+ x y)))" in
   assert_equal (Execute.eval_string s) "15"
 
+let test_multilet1 _ =
+  let s = "(let [(x 10)] (+ x 5))" in
+  assert_equal (Execute.eval_string s) "15"
+
+let test_multilet2 _ =
+  let s = "(let [(x 10) (y 5)] (+ x y))" in
+  assert_equal (Execute.eval_string s) "15"
+
 let suite =
   "LetTestList" >::: [
     "test_let1" >:: test_let1
   ; "test_let2" >:: test_let2
   ; "test_let3" >:: test_let3
   ; "test_let4" >:: test_let4
+  ; "test_multilet1" >:: test_multilet1
+  ; "test_multilet2" >:: test_multilet2
   ]
 
 let () =

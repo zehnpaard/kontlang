@@ -3,7 +3,7 @@ type t =
 | Var of string
 | Call of t * t list
 | If of t * t * t
-| Let of string * t * t
+| Let of (string * t) list * t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -18,7 +18,10 @@ let rec to_string = function
     let s2 = (to_string e2) in
     let s3 = (to_string e3) in
     Printf.sprintf "(if %s %s %s)" s1 s2 s3
-| Let (v1, e1, e2) ->
-    let s1 = to_string e1 in
+| Let (ves, e2) ->
+    let vess = to_string_ves ves in
     let s2 = to_string e2 in
-    Printf.sprintf "(let %s %s %s)" v1 s1 s2
+    Printf.sprintf "(let [%s] %s)" vess s2
+and to_string_ves ves =
+  let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
+  List.map f ves |> String.concat " "

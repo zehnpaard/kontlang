@@ -29,6 +29,10 @@ let test_multilet3 _ =
   let s = "(let [x 3] (+ (let [(x 10) (y 5)] (+ x y)) x))" in
   assert_equal (Execute.eval_string s) "18"
 
+let test_lets1 _ =
+  let s = "(let* [(x 3) (y (+ x 5)) (z (* x y))] (+ x y z))" in
+  assert_equal (Execute.eval_string s) "35"
+
 let suite =
   "LetTestList" >::: [
     "test_let1" >:: test_let1
@@ -38,6 +42,7 @@ let suite =
   ; "test_multilet1" >:: test_multilet1
   ; "test_multilet2" >:: test_multilet2
   ; "test_multilet3" >:: test_multilet3
+  ; "test_lets1" >:: test_lets1
   ]
 
 let () =

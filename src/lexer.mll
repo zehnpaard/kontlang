@@ -9,6 +9,10 @@ rule f = parse
   | number as n { Parser.INT (int_of_string n) }
   | "(" { Parser.LPAREN }
   | ")" { Parser.RPAREN }
+  | "[" { Parser.LBRACK }
+  | "]" { Parser.RBRACK }
   | "if" { Parser.IF }
+  | "let" { Parser.LET }
+  | "let*" { Parser.LETS }
   | variable as s { Parser.VAR s }
   | eof { EOF }

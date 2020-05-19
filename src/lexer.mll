@@ -13,5 +13,6 @@ rule f = parse
   | "]" { Parser.RBRACK }
   | "if" { Parser.IF }
   | "let" { Parser.LET }
+  | "let*" { Parser.LETS }
   | variable as s { Parser.VAR s }
   | eof { EOF }

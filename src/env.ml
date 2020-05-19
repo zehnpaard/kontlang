@@ -3,6 +3,9 @@ type t = (string * Val.t) list list
 let empty = [[]]
 
 let extend var val_ env = [(var, val_)]::env
+let extend_current var val_ = function
+| [] -> [[(var, val_)]]
+| env::env' -> ((var, val_)::env)::env'
 let extend_list vvs env = vvs :: env
 
 let rec find var = function

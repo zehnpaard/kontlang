@@ -15,5 +15,6 @@ rule f = parse
   | "let" { Parser.LET }
   | "let*" { Parser.LETS }
   | "fn" { Parser.FN }
+  | "letfn" { Parser.LETFN }
   | variable as s { Parser.VAR s }
   | eof { EOF }

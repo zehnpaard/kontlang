@@ -5,6 +5,7 @@ type t =
 | If of t * t * t
 | Let of (string * t) list * t
 | Lets of (string * t) list * t
+| Fn of string list * t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -27,6 +28,8 @@ let rec to_string = function
     let vess = to_string_ves ves in
     let s2 = to_string e2 in
     Printf.sprintf "(let* [%s] %s)" vess s2
+| Fn (params, body) ->
+    Printf.sprintf "(fn [%s] %s)" (String.concat " " params) (to_string body)
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "

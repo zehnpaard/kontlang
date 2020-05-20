@@ -14,5 +14,6 @@ rule f = parse
   | "if" { Parser.IF }
   | "let" { Parser.LET }
   | "let*" { Parser.LETS }
+  | "fn" { Parser.FN }
   | variable as s { Parser.VAR s }
   | eof { EOF }

@@ -21,7 +21,7 @@ let apply_cont env cont v = match cont with
   | Val.Fn(s, ss, e) :: vs' ->
     let paramcount = List.length ss in
     let argcount = List.length vs' in
-    if paramcount = argcount then Eval(Env.extend_list (List.combine ss vs') env, cont', e)
+    if paramcount = argcount then Eval(Env.extend_list (List.combine ss vs') env, Cont.Env::cont', e)
     else failwith @@ Printf.sprintf "Function %s called with incorrect number of args: expected %d received %d" s paramcount argcount
   | _ -> failwith "Calling non-callable in operator position")
 | Cont.Call(e::es, vs) :: cont' -> Eval(env, Cont.Call(es, v::vs) :: cont', e)

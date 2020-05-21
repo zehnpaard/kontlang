@@ -12,12 +12,21 @@ let eval env cont = function
 | Exp.Let _ -> failwith "Evaluating empty Let"
 | Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2) :: cont, e1)
 | Exp.Lets _ -> failwith "Evaluating empty Let"
+| Exp.Fn(params, body) -> ApplyCont(env, cont, Val.Fn("anon", params, body))
+| Exp.LetFn(fns, e) ->
+    let f (fname, params, body) = (fname, Val.Fn(fname, params, body)) in
+    Eval(Env.extend_list (List.map f fns) env, Cont.Env::cont, e)
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
 | Cont.Call([], vs) :: cont' -> (match List.rev (v::vs) with
   | Val.Op(_, fn) :: vs' -> ApplyCont(env, cont', (fn vs'))
-  | _ -> failwith "Calling non-op in operator position")
+  | Val.Fn(s, ss, e) :: vs' ->
+    let paramcount = List.length ss in
+    let argcount = List.length vs' in
+    if paramcount = argcount then Eval(Env.extend_list (List.combine ss vs') env, Cont.Env::cont', e)
+    else failwith @@ Printf.sprintf "Function %s called with incorrect number of args: expected %d received %d" s paramcount argcount
+  | _ -> failwith "Calling non-callable in operator position")
 | Cont.Call(e::es, vs) :: cont' -> Eval(env, Cont.Call(es, v::vs) :: cont', e)
 | Cont.If(e2, e3) :: cont' -> (match v with
   | Val.Bool b -> Eval(env, cont', if b then e2 else e3)

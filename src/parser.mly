@@ -27,7 +27,12 @@ expr :
 | LPAREN; LETS; LBRACK; ves = nonempty_list(var_exp); RBRACK; e2 = expr; RPAREN { Exp.Lets (ves, e2) }
 | LPAREN; FN; LBRACK; ss = list(VAR); RBRACK; e = expr; RPAREN { Exp.Fn (ss, e) }
 | LPAREN; LETFN; LBRACK; fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; RBRACK; e = expr; RPAREN
-    { Exp.LetFn (fname, ss, body, e) }
+    { Exp.LetFn ([(fname, ss, body)], e) }
+| LPAREN; LETFN; LBRACK; fns = list(func); RBRACK; e = expr; RPAREN
+    { Exp.LetFn (fns, e) }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }
+
+func :
+| LPAREN; fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; RPAREN; { (fname, ss, body) }

@@ -13,9 +13,9 @@ let eval env cont = function
 | Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2) :: cont, e1)
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) -> ApplyCont(env, cont, Val.Fn("anon", params, body))
-| Exp.LetFn(fname, params, body, e) ->
-    let fn = Val.Fn(fname, params, body) in
-    Eval(Env.extend fname fn env, Cont.Env::cont, e)
+| Exp.LetFn(fns, e) ->
+    let f (fname, params, body) = (fname, Val.Fn(fname, params, body)) in
+    Eval(Env.extend_list (List.map f fns) env, Cont.Env::cont, e)
 
 let apply_cont env cont v = match cont with
 | [] -> Done v

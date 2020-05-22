@@ -31,12 +31,12 @@ let eval env cont = function
 | Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2) :: cont, e1)
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) as e ->
-    let free = get_free env e in
+    let free = get_free Env.empty e in
     let fvals = List.map (fun v -> v, Env.find v env) free in
     ApplyCont(env, cont, Val.Fn("anon", params, fvals, body))
 | Exp.LetFn(fns, e) ->
     let f (fname, params, body) =
-      let free = get_free (Env.add_vars env params) body in
+      let free = get_free (Env.add_vars Env.empty params) body in
       let fvals = List.map (fun v -> v, Env.find v env) free in
       (fname, Val.Fn(fname, params, fvals, body))
     in
@@ -51,7 +51,7 @@ let apply_cont env cont v = match cont with
     let argcount = List.length vs' in
     if paramcount = argcount then
       let env' = Env.extend_list (fvals @ (List.combine ss vs')) env in
-      Eval(env', Cont.Env::Cont.Env::cont', e)
+      Eval(env', Cont.Env::cont', e)
     else failwith @@ Printf.sprintf "Function %s called with incorrect number of args: expected %d received %d" s paramcount argcount
   | _ -> failwith "Calling non-callable in operator position")
 | Cont.Call(e::es, vs) :: cont' -> Eval(env, Cont.Call(es, v::vs) :: cont', e)

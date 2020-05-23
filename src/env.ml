@@ -18,3 +18,15 @@ let rec find var = function
 let pop = function
 | [] -> failwith "Popping empty environment"
 | _::env' -> env'
+
+let rec contains var = function
+| [] -> false
+| []::env' -> contains var env'
+| ((var', _)::env')::env'' ->
+    if var = var' then true
+    else contains var @@ env'::env''
+
+let add_var env v = extend_current v (Val.Int 0) env
+let add_vars env vs =
+  let vvs = List.map (fun v -> (v, Val.Int 0)) vs in
+  extend_list vvs env

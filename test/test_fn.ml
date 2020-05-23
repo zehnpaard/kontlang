@@ -39,6 +39,14 @@ let test_letfn_multi1 _ =
   let s = "(letfn [(f [x] (+ x x)) (g [y] (* y y))] (- (g 10) (f 5)))" in
   assert_equal (Execute.eval_string s) "90"
 
+let test_lexical1 _ =
+  let s = "(let [f (let [x 3] (fn [a] (+ a x)))] (f 5))" in
+  assert_equal (Execute.eval_string s) "8"
+
+let test_lexical2 _ =
+  let s = "(let [f (let [(x 4) (y 5)] (fn [a] (fn [b] (+ a b x y))))] ((f 6) 7))" in
+  assert_equal (Execute.eval_string s) "22"
+
 let suite =
   "FnTestList" >::: [
     "test_fn1" >:: test_fn1
@@ -50,6 +58,8 @@ let suite =
   ; "test_letfn1" >:: test_letfn1
   ; "test_letfn2" >:: test_letfn2
   ; "test_letfn_multi1" >:: test_letfn_multi1
+  ; "test_lexical1" >:: test_lexical1
+  ; "test_lexical2" >:: test_lexical2
   ]
 
 let () =

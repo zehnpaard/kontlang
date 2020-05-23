@@ -29,15 +29,13 @@ expr :
 | LPAREN; FN; LBRACK; ss = list(VAR); RBRACK; e = expr; RPAREN { Exp.Fn (ss, e) }
 | LPAREN; LETFN; LBRACK; fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; RBRACK; e = expr; RPAREN
     { Exp.LetFn ([(fname, ss, body)], e) }
-| LPAREN; LETFN; LBRACK; fns = list(func'); RBRACK; e = expr; RPAREN
+| LPAREN; LETFN; LBRACK; fns = list(func); RBRACK; e = expr; RPAREN
     { Exp.LetFn (fns, e) }
-| LPAREN; LETREC; LBRACK; f = func; RBRACK; body = expr; RBRACK; e = expr; RPAREN
-    { (fun (fname, ss, body) -> Exp.LetRec (fname, ss, body, e)) f }
+| LPAREN; LETREC; LBRACK; fn = func; RBRACK; e = expr; RPAREN
+    { Exp.LetRec (fn, e) }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }
 
 func :
-| fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; { (fname, ss, body) }
-func' :
-| LPAREN; f = func; RPAREN { f }
+| LPAREN; fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; RPAREN { (fname, ss, body) }

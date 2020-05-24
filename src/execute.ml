@@ -33,7 +33,7 @@ let eval env cont = function
 | Exp.If(e1, e2, e3) -> Eval(env, Cont.If(e2, e3) :: cont, e1)
 | Exp.Let((s, e1)::ves, e2) -> Eval(env, Cont.Let(s, ves, [], e2) :: cont, e1)
 | Exp.Let _ -> failwith "Evaluating empty Let"
-| Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2) :: cont, e1)
+| Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2) :: Cont.Env :: cont, e1)
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) as e ->
     let free = get_free Env.empty e in
@@ -88,7 +88,7 @@ let apply_cont env cont v = match cont with
 | Cont.Let(s, (s', e')::ves, vvs, e2) :: cont' ->
     Eval(env, Cont.Let(s', ves, (s, v)::vvs, e2) :: cont', e')
 | Cont.Lets(s, [], e2) :: cont' ->
-    Eval(Env.extend_current s v env, Cont.Env::cont', e2)
+    Eval(Env.extend_current s v env, cont', e2)
 | Cont.Lets(s, (s', e')::ves, e2) :: cont' ->
     Eval(Env.extend_current s v env, Cont.Lets(s', ves, e2) :: cont', e')
 | Cont.Env :: cont' -> ApplyCont (Env.pop env, cont', v)

@@ -9,6 +9,7 @@
 %token LETS
 %token FN
 %token LETFN
+%token LETREC
 %token EOF
 
 %start <Exp.t> f
@@ -28,11 +29,18 @@ expr :
 | LPAREN; FN; LBRACK; ss = list(VAR); RBRACK; e = expr; RPAREN { Exp.Fn (ss, e) }
 | LPAREN; LETFN; LBRACK; fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; RBRACK; e = expr; RPAREN
     { Exp.LetFn ([(fname, ss, body)], e) }
-| LPAREN; LETFN; LBRACK; fns = list(func); RBRACK; e = expr; RPAREN
+| LPAREN; LETFN; LBRACK; fns = list(funcp); RBRACK; e = expr; RPAREN
     { Exp.LetFn (fns, e) }
+| LPAREN; LETREC; LBRACK; fn = func; RBRACK; e = expr; RPAREN
+    { Exp.LetRec ([fn], e) }
+| LPAREN; LETREC; LBRACK; fns = list(funcp); RBRACK; e = expr; RPAREN
+    { Exp.LetRec (fns, e) }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }
 
 func :
-| LPAREN; fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; RPAREN; { (fname, ss, body) }
+| fname = VAR; LBRACK; ss = list(VAR); RBRACK; body = expr; { (fname, ss, body) }
+
+funcp :
+| LPAREN; fn = func; RPAREN { fn }

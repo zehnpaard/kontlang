@@ -7,6 +7,7 @@ type t =
 | Lets of (string * t) list * t
 | Fn of string list * t
 | LetFn of (string * string list * t) list * t
+| LetRec of (string * string list * t) list * t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -32,6 +33,10 @@ let rec to_string = function
 | Fn (params, body) ->
     Printf.sprintf "(fn [%s] %s)" (String.concat " " params) (to_string body)
 | LetFn (fns, e) ->
+    let fns_s = to_string_fns fns in
+    let exp_s = to_string e in
+    Printf.sprintf "(letfn [%s] %s)" fns_s exp_s
+| LetRec (fns, e) ->
     let fns_s = to_string_fns fns in
     let exp_s = to_string e in
     Printf.sprintf "(letfn [%s] %s)" fns_s exp_s

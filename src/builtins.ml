@@ -66,6 +66,14 @@ let cdr_op = function
   | [Val.Cons(_, y)] -> y
   | _ -> failwith "Non-cons passed to cdr"
 
+let rec list_op = function
+  | [] -> Val.Nil
+  | x::xs' -> Val.Cons(x, list_op xs')
+
+let apply_op = function
+  | [Val.Op(_, op); Val.Cons _ as cons] -> op @@ Val.cons_to_list cons
+  | _ -> failwith "Incorrect args passed to apply"
+
 let builtins =
 [ "+", num_num_op "+" (+)
 ; "-", num_num_op "-" (-)
@@ -85,6 +93,8 @@ let builtins =
 ; "cons", Val.Op("cons", cons_op)
 ; "car", Val.Op("car", car_op)
 ; "cdr", Val.Op("cdr", cdr_op)
+; "list", Val.Op("list", list_op)
+; "apply", Val.Op("apply", apply_op)
 ]
 
 let load env = Env.extend_list builtins env

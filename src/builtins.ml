@@ -7,7 +7,7 @@ let num_num_op s op =
   | [] -> failwith @@ Printf.sprintf "Numeric op %s applied to empty list" s
   | y::ys -> Val.Int (List.fold_left op y ys)
   in
-  Val.Op (s, f)
+  Val.Op(s, f)
 
 let num_bool_op s op =
   let g = function
@@ -23,7 +23,7 @@ let num_bool_op s op =
   | [_] -> failwith @@ Printf.sprintf "NumBool op %s applied to one arg" s
   | ys -> h op ys
   in
-  Val.Op (s, f)
+  Val.Op(s, f)
 
 let not_equal_op =
   let g = function
@@ -47,7 +47,7 @@ let bool_bool_op s op =
   | _ -> failwith @@ "Non-boolean value passed to bool op " ^ s
   in
   let f xs = Val.Bool (List.fold_left (fun x y -> op x @@ g y) true xs) in
-  Val.Op (s, f)
+  Val.Op(s, f)
 
 let not_op = function
   | [Val.Bool b] -> Val.Bool (not b)

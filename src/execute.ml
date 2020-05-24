@@ -20,9 +20,10 @@ let rec get_free env = function
     let f params body = get_free (Env.add_vars env params) body in
     let free_in_fns = List.concat @@ List.map2 f paramss bodys in
     (get_free (Env.add_vars env fnames) e) @ free_in_fns
-| Exp.LetRec((fname, params, fbody), e) ->
+| Exp.LetRec((fname, params, fbody)::_, e) ->
     let f params fbody = get_free (Env.add_vars env (fname::params)) fbody in
     (get_free (Env.add_var env fname) e) @ f params fbody
+| Exp.LetRec _ -> failwith ""
 
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
@@ -44,7 +45,7 @@ let eval env cont = function
       (fname, Val.Fn(fname, params, fvals, body))
     in
     Eval(Env.extend_list (List.map f fns) env, Cont.Env::cont, e)
-| Exp.LetRec((fname, params, fbody), e) ->
+| Exp.LetRec((fname, params, fbody)::_, e) ->
     let f (fname, params, body) =
       let free = get_free (Env.add_vars Env.empty (fname::params)) body in
       let fvals = List.map (fun v -> v, Env.find v env) free in
@@ -54,6 +55,7 @@ let eval env cont = function
       (fname, fn)
     in
     Eval(Env.extend_list [f (fname, params, fbody)] env, Cont.Env::cont, e)
+| Exp.LetRec _ -> failwith ""
 
 let apply_cont env cont v = match cont with
 | [] -> Done v

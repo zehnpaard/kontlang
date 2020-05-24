@@ -20,10 +20,11 @@ let rec get_free env = function
     let f params body = get_free (Env.add_vars env params) body in
     let free_in_fns = List.concat @@ List.map2 f paramss bodys in
     (get_free (Env.add_vars env fnames) e) @ free_in_fns
-| Exp.LetRec((fname, params, fbody)::_, e) ->
-    let f params fbody = get_free (Env.add_vars env (fname::params)) fbody in
-    (get_free (Env.add_var env fname) e) @ f params fbody
-| Exp.LetRec _ -> failwith ""
+| Exp.LetRec(fns, e) ->
+    let fnames, paramss, bodys = Utils.split3 fns in
+    let f params body = get_free (Env.add_vars env (fnames @ params)) body in
+    let free_in_fns = List.concat @@ List.map2 f paramss bodys in
+    (get_free (Env.add_vars env fnames) e) @ free_in_fns
 
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)

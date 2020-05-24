@@ -33,12 +33,23 @@ let test_letrec_multi2 _ =
   " in
   assert_equal (Execute.eval_string s) "false"
 
+let test_fn_letrec1 _ =
+  let s = "
+  ((fn [x]
+     (letrec [(f [x] (g x))
+              (g [x] (+ x 1))]
+       (f (g x))))
+    5)
+  " in
+  assert_equal (Execute.eval_string s) "7"
+
 let suite =
   "LetRecTestList" >::: [
     "test_letrec1" >:: test_letrec1
   ; "test_letrec2" >:: test_letrec2
   ; "test_letrec_multi1" >:: test_letrec_multi1
   ; "test_letrec_multi2" >:: test_letrec_multi2
+  ; "test_fn_letrec1" >:: test_fn_letrec1
   ]
 
 let () =

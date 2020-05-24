@@ -4,3 +4,13 @@ let split3 xyzs =
   | (x,y,z)::xyzs -> f (x::xs) (y::ys) (z::zs) xyzs
   in
   f [] [] [] xyzs
+
+let dedupe xs =
+  let hsh = Hashtbl.create 1024 in
+  let rec f acc = function
+  | [] -> acc
+  | x::xs' ->
+    if Hashtbl.mem hsh x then f acc xs'
+    else (Hashtbl.add hsh x 0; f (x::acc) xs')
+  in
+  f [] xs

@@ -33,15 +33,15 @@ let eval env cont = function
 | Exp.If(e1, e2, e3) -> Eval(env, Cont.If(e2, e3) :: cont, e1)
 | Exp.Let((s, e1)::ves, e2) -> Eval(env, Cont.Let(s, ves, [], e2) :: cont, e1)
 | Exp.Let _ -> failwith "Evaluating empty Let"
-| Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2) :: cont, e1)
+| Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2)::Cont.Env::cont, e1)
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) as e ->
-    let free = get_free Env.empty e in
+    let free = Utils.dedupe @@ get_free Env.empty e in
     let fvals = List.map (fun v -> v, Env.find v env) free in
     ApplyCont(env, cont, Val.Fn("anon", params, fvals, body))
 | Exp.LetFn(fns, e) ->
     let f (fname, params, body) =
-      let free = get_free (Env.add_vars Env.empty params) body in
+      let free = Utils.dedupe @@ get_free (Env.add_vars Env.empty params) body in
       let fvals = List.map (fun v -> v, Env.find v env) free in
       (fname, Val.Fn(fname, params, fvals, body))
     in
@@ -49,7 +49,7 @@ let eval env cont = function
 | Exp.LetRec(fns, e) ->
     let fnames, _, _ = Utils.split3 fns in
     let f fnames (fname, params, body) =
-      let free = get_free (Env.add_vars Env.empty (fnames @ params)) body in
+      let free = Utils.dedupe @@ get_free (Env.add_vars Env.empty (fnames @ params)) body in
       let fvals = List.map (fun v -> v, Env.find v env) free in
       let fvalsr = ref fvals in
       let fn = Val.RecFn(fname, params, fvalsr, body) in
@@ -83,12 +83,12 @@ let apply_cont env cont v = match cont with
   | Val.Bool b -> Eval(env, cont', if b then e2 else e3)
   | _ -> failwith "Non-boolean in condition position of If expression")
 | Cont.Let(s, [], vvs, e2) :: cont' ->
-    let env' = Env.extend_list (List.rev ((s, v)::vvs)) env in
+    let env' = Env.extend_list ((s, v)::vvs) env in
     Eval(env', Cont.Env::cont', e2)
 | Cont.Let(s, (s', e')::ves, vvs, e2) :: cont' ->
     Eval(env, Cont.Let(s', ves, (s, v)::vvs, e2) :: cont', e')
 | Cont.Lets(s, [], e2) :: cont' ->
-    Eval(Env.extend_current s v env, Cont.Env::cont', e2)
+    Eval(Env.extend_current s v env, cont', e2)
 | Cont.Lets(s, (s', e')::ves, e2) :: cont' ->
     Eval(Env.extend_current s v env, Cont.Lets(s', ves, e2) :: cont', e')
 | Cont.Env :: cont' -> ApplyCont (Env.pop env, cont', v)

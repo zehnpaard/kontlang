@@ -4,5 +4,6 @@
     test_bool
     test_let
     test_fn
-    test_letrec)
+    test_letrec
+    test_cons)
   (libraries ounit2 kontlang))

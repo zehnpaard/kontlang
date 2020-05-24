@@ -9,10 +9,36 @@ let test_letrec2 _ =
   let s = "(letrec [f [x] (if (= x 1) 1 (* x (f (- x 1))))] (f 5))" in
   assert_equal (Execute.eval_string s) "120"
 
+let test_letrec_multi1 _ =
+  let s = "
+  (letrec [(odd? [x] (if (= x 1)
+                         true
+                         (not (even? (- x 1)))))
+           (even? [x] (if (= x 0)
+                          true
+                          (not (odd? (- x 1)))))]
+    (odd? 11))
+  " in
+  assert_equal (Execute.eval_string s) "true"
+
+let test_letrec_multi2 _ =
+  let s = "
+  (letrec [(odd? [x] (if (= x 0)
+                         false
+                         (even? (- x 1))))
+           (even? [x] (if (= x 0)
+                          true
+                          (odd? (- x 1))))]
+    (even? 23))
+  " in
+  assert_equal (Execute.eval_string s) "false"
+
 let suite =
   "LetRecTestList" >::: [
     "test_letrec1" >:: test_letrec1
   ; "test_letrec2" >:: test_letrec2
+  ; "test_letrec_multi1" >:: test_letrec_multi1
+  ; "test_letrec_multi2" >:: test_letrec_multi2
   ]
 
 let () =

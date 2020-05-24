@@ -33,6 +33,8 @@ expr :
     { Exp.LetFn (fns, e) }
 | LPAREN; LETREC; LBRACK; fn = func; RBRACK; e = expr; RPAREN
     { Exp.LetRec ([fn], e) }
+| LPAREN; LETREC; LBRACK; fns = list(funcp); RBRACK; e = expr; RPAREN
+    { Exp.LetRec (fns, e) }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }

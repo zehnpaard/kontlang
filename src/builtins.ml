@@ -74,6 +74,16 @@ let apply_op = function
   | [Val.Op(_, op); Val.Cons _ as cons] -> op @@ Val.cons_to_list cons
   | _ -> failwith "Incorrect args passed to apply"
 
+let nilp_op = function
+  | [Val.Nil] -> Val.Bool true
+  | [_] -> Val.Bool false
+  | _ -> failwith "nil? called with invalid number of args"
+
+let consp_op = function
+  | [Val.Cons _] -> Val.Bool true
+  | [_] -> Val.Bool false
+  | _ -> failwith "cons? called with invalid number of args"
+
 let builtins =
 [ "+", num_num_op "+" (+)
 ; "-", num_num_op "-" (-)
@@ -90,11 +100,14 @@ let builtins =
 ; "and", bool_bool_op "and" (&&)
 ; "or", bool_bool_op "or" (||)
 ; "not", Val.Op("not", not_op)
+; "nil", Val.Nil
 ; "cons", Val.Op("cons", cons_op)
 ; "car", Val.Op("car", car_op)
 ; "cdr", Val.Op("cdr", cdr_op)
 ; "list", Val.Op("list", list_op)
 ; "apply", Val.Op("apply", apply_op)
+; "nil?", Val.Op("nil?", nilp_op)
+; "cons?", Val.Op("cons?", consp_op)
 ]
 
 let load env = Env.extend_list builtins env

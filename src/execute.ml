@@ -38,11 +38,21 @@ let eval env cont = function
     let fname_fns, fvalsrs = List.split @@ List.map f fns in
     List.iter (fun fvalsr -> (fvalsr := (fname_fns @ !fvalsr))) fvalsrs;
     Eval(Env.extend_list fname_fns env, Cont.Env::cont, e)
+  | Exp.Macro(ss, e) -> ApplyCont(env, cont, Val.Macro(ss, e))
   | Exp.Do(e::es) -> Eval(env, Cont.Do es::cont, e)
   | Exp.Do([]) -> failwith "Evaluating empty do"
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
+| Cont.Call(e::es as es', []) :: cont' -> (match v with
+  | Val.Macro (ss, me) ->
+      let paramcount = List.length ss in
+      let argcount = List.length es' in
+      if paramcount = argcount then
+        Eval(env, cont', Macro.substitute me ss es')
+      else failwith @@ Printf.sprintf "Macro called with incorrect number of args: expected %d received %d" paramcount argcount
+  | _ -> Eval(env, Cont.Call(es, [v]) :: cont', e))
+| Cont.Call(e::es, vs) :: cont' -> Eval(env, Cont.Call(es, v::vs) :: cont', e)
 | Cont.Call([], vs) :: cont' -> (match List.rev (v::vs) with
   | Val.Op(_, fn) :: vs' -> ApplyCont(env, cont', (fn vs'))
   | Val.Fn(s, ss, fvalsr, e) :: vs' ->
@@ -53,7 +63,6 @@ let apply_cont env cont v = match cont with
       Eval(env', Cont.Env::cont', e)
     else failwith @@ Printf.sprintf "Function %s called with incorrect number of args: expected %d received %d" s paramcount argcount
   | _ -> failwith "Calling non-callable in operator position")
-| Cont.Call(e::es, vs) :: cont' -> Eval(env, Cont.Call(es, v::vs) :: cont', e)
 | Cont.If(e2, e3) :: cont' -> (match v with
   | Val.Bool b -> Eval(env, cont', if b then e2 else e3)
   | _ -> failwith "Non-boolean in condition position of If expression")

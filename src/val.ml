@@ -5,6 +5,7 @@ type t =
 | Bool of bool
 | Op of string * (t list -> t)
 | Fn of string * string list * (string * t) list ref * Exp.t
+| Macro of string list * Exp.t
 | Cons of t * t
 
 let rec is_list = function
@@ -29,6 +30,7 @@ let rec to_string = function
 | Bool b -> string_of_bool b
 | Op(s, _) -> Printf.sprintf "Op(%s)" s
 | Fn(s, _, _, _) -> Printf.sprintf "Fn(%s)" s
+| Macro _ -> "Macro()"
 | Cons _ as v ->
     Printf.sprintf "(%s)" (if is_list v then (to_string_list @@ cons_to_list v)
                            else (to_string_dotted_list @@ cons_to_dotted_list [] v))

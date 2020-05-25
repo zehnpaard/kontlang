@@ -48,14 +48,14 @@ let eval env cont = function
     Eval(Env.extend_list (List.map f fns) env, Cont.Env::cont, e)
 | Exp.LetRec(fns, e) ->
     let fnames, _, _ = Utils.split3 fns in
-    let f fnames (fname, params, body) =
+    let f (fname, params, body) =
       let free = Utils.dedupe @@ get_free (Env.add_vars Env.empty (fnames @ params)) body in
       let fvals = List.map (fun v -> v, Env.find v env) free in
       let fvalsr = ref fvals in
       let fn = Val.RecFn(fname, params, fvalsr, body) in
       ((fname, fn), fvalsr)
     in
-    let fname_fns, fvalsrs = List.split @@ List.map (f fnames) fns in
+    let fname_fns, fvalsrs = List.split @@ List.map f fns in
     List.iter (fun fvalsr -> (fvalsr := (fname_fns @ !fvalsr))) fvalsrs;
     Eval(Env.extend_list fname_fns env, Cont.Env::cont, e)
 

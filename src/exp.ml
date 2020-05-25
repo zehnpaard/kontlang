@@ -3,6 +3,7 @@ type t =
 | Var of string
 | Call of t * t list
 | If of t * t * t
+| Cond of (t * t) list
 | Let of (string * t) list * t
 | Lets of (string * t) list * t
 | Fn of string list * t
@@ -22,6 +23,9 @@ let rec to_string = function
     let s2 = (to_string e2) in
     let s3 = (to_string e3) in
     Printf.sprintf "(if %s %s %s)" s1 s2 s3
+| Cond(ees) ->
+    let f (e1, e2) = Printf.sprintf "[%s %s]" (to_string e1) (to_string e2) in
+    Printf.sprintf "(cond %s)" (String.concat " " @@ List.map f ees)
 | Let(ves, e2) ->
     let vess = to_string_ves ves in
     let s2 = to_string e2 in
@@ -60,6 +64,9 @@ let rec get_free bound free = function
 | If(e1, e2, e3) ->
     let es' = [e1; e2; e3] in
     List.fold_left (get_free bound) free es'
+| Cond(ees) ->
+    let f free (e1, e2) = get_free bound (get_free bound free e1) e2 in
+    List.fold_left f free ees
 | Let(ves, e2) ->
     let vs, es = List.split ves in
     let free' = List.fold_left (get_free bound) free es in

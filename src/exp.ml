@@ -10,6 +10,7 @@ type t =
 | Fn of string list * t
 | LetFn of (string * string list * t) list * t
 | LetRec of (string * string list * t) list * t
+| Do of t list
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -46,6 +47,7 @@ let rec to_string = function
     let fns_s = to_string_fns fns in
     let exp_s = to_string e in
     Printf.sprintf "(letfn [%s] %s)" fns_s exp_s
+| Do es -> Printf.sprintf "(do [%s])" @@ String.concat " " @@ List.map to_string es
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "
@@ -84,3 +86,4 @@ let rec get_free bound free = function
     let f free params body = get_free (fnames @ params @ bound) free body in
     let free' = List.fold_left2 f free paramss bodys in
     get_free (fnames @ bound) free' e
+| Do es -> List.fold_left (get_free bound) free es

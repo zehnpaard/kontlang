@@ -1,6 +1,7 @@
 type t =
 | Nil
 | Int of int
+| Str of string
 | Bool of bool
 | Op of string * (t list -> t)
 | Fn of string * string list * (string * t) list ref * Exp.t
@@ -24,6 +25,7 @@ let rec cons_to_dotted_list acc = function
 let rec to_string = function
 | Nil -> "nil"
 | Int n -> string_of_int n
+| Str s -> Printf.sprintf "\"%s\"" s
 | Bool b -> string_of_bool b
 | Op(s, _) -> Printf.sprintf "Op(%s)" s
 | Fn(s, _, _, _) -> Printf.sprintf "Fn(%s)" s

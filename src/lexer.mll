@@ -3,10 +3,12 @@ let digit = ['0'-'9']
 let char = ['a'-'z' 'A'-'Z' '+' '-' '*' '/' '<' '>' '=' '!' '?' '_']
 let number = ('0'|['1'-'9'] digit*)
 let variable = char (char|digit)*
+let string = '"' + (' '|char|number)* '"'
 
 rule f = parse
   | whitespace* { f lexbuf }
   | number as n { Parser.INT (int_of_string n) }
+  | string as s { Parser.STR (String.sub s 1 @@ String.length s - 2) }
   | "(" { Parser.LPAREN }
   | ")" { Parser.RPAREN }
   | "[" { Parser.LBRACK }

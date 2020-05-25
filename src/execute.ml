@@ -6,6 +6,7 @@ type t =
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
+| Exp.Str s -> ApplyCont(env, cont, Val.Str s)
 | Exp.Call(e, es) -> Eval(env, Cont.Call(es, []) :: cont, e)
 | Exp.If(e1, e2, e3) -> Eval(env, Cont.If(e2, e3) :: cont, e1)
 | Exp.Cond((e1,e2)::ees) -> Eval(env, Cont.Cond(e2, ees)::cont, e1)

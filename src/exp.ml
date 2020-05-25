@@ -1,5 +1,6 @@
 type t =
 | Int of int
+| Str of string
 | Var of string
 | Call of t * t list
 | If of t * t * t
@@ -12,6 +13,7 @@ type t =
 
 let rec to_string = function
 | Int n -> string_of_int n
+| Str s -> Printf.sprintf "\"%s\"" s
 | Var s -> s
 | Call(e, []) -> Printf.sprintf "(%s)" @@ to_string e 
 | Call(e, es) ->
@@ -56,7 +58,7 @@ and to_string_fns fns =
   String.concat " " @@ List.map f fns
 
 let rec get_free bound free = function
-| Int _ -> free
+| Int _ | Str _  -> free
 | Var s -> if (List.mem s bound) then free else s::free
 | Call(e, es) -> List.fold_left (get_free bound) free @@ e::es
 | If(e1, e2, e3) -> List.fold_left (get_free bound) free [e1; e2; e3]

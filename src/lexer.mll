@@ -12,6 +12,7 @@ rule f = parse
   | "[" { Parser.LBRACK }
   | "]" { Parser.RBRACK }
   | "if" { Parser.IF }
+  | "cond" { Parser.COND }
   | "let" { Parser.LET }
   | "let*" { Parser.LETS }
   | "fn" { Parser.FN }

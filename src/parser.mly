@@ -1,5 +1,6 @@
 %token <int> INT
 %token <string> VAR
+%token <string> STR
 %token LPAREN
 %token RPAREN
 %token LBRACK
@@ -11,6 +12,7 @@
 %token FN
 %token LETFN
 %token LETREC
+%token DO
 %token EOF
 
 %start <Exp.t> f
@@ -22,6 +24,7 @@ f : e = expr; EOF { e }
 expr :
 | n = INT; { Exp.Int n }
 | s = VAR; { Exp.Var s }
+| s = STR; { Exp.Str s }
 | LPAREN; e = expr; es = list (expr); RPAREN { Exp.Call(e, es) }
 | LPAREN; IF; e1 = expr; e2 = expr; e3 = expr; RPAREN { Exp.If(e1, e2, e3) }
 | LPAREN; COND; ees = nonempty_list(cond_pair); RPAREN { Exp.Cond ees }
@@ -37,6 +40,7 @@ expr :
     { Exp.LetRec([fn], e) }
 | LPAREN; LETREC; LBRACK; fns = list(funcp); RBRACK; e = expr; RPAREN
     { Exp.LetRec(fns, e) }
+| LPAREN; DO; LBRACK; es = nonempty_list(expr); RBRACK; RPAREN; { Exp.Do es }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }

@@ -6,6 +6,7 @@ type t =
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
+| Exp.Str s -> ApplyCont(env, cont, Val.Str s)
 | Exp.Call(e, es) -> Eval(env, Cont.Call(es, []) :: cont, e)
 | Exp.If(e1, e2, e3) -> Eval(env, Cont.If(e2, e3) :: cont, e1)
 | Exp.Cond((e1,e2)::ees) -> Eval(env, Cont.Cond(e2, ees)::cont, e1)
@@ -37,6 +38,8 @@ let eval env cont = function
     let fname_fns, fvalsrs = List.split @@ List.map f fns in
     List.iter (fun fvalsr -> (fvalsr := (fname_fns @ !fvalsr))) fvalsrs;
     Eval(Env.extend_list fname_fns env, Cont.Env::cont, e)
+  | Exp.Do(e::es) -> Eval(env, Cont.Do es::cont, e)
+  | Exp.Do([]) -> failwith "Evaluating empty do"
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
@@ -66,6 +69,8 @@ let apply_cont env cont v = match cont with
     Eval(Env.extend_current s v env, cont', e2)
 | Cont.Lets(s, (s', e')::ves, e2) :: cont' ->
     Eval(Env.extend_current s v env, Cont.Lets(s', ves, e2) :: cont', e')
+| Cont.Do(e::es)::cont' -> Eval(env, Cont.Do es::cont', e)
+| Cont.Do([])::cont' -> ApplyCont(env, cont', v)
 | Cont.Env :: cont' -> ApplyCont (Env.pop env, cont', v)
 
 let rec trampoline = function

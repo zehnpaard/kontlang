@@ -84,6 +84,25 @@ let consp_op = function
   | [_] -> Val.Bool false
   | _ -> failwith "cons? called with invalid number of args"
 
+let concat_op ss =
+  let f = function
+  | Val.Str s -> s
+  | _ -> failwith "Non-string passed to concat"
+  in
+  Val.Str (String.concat "" @@ List.map f ss)
+  
+let print_op = function
+  | [Val.Str s] -> print_string s; Val.Nil
+  | _ -> failwith "Non-string passed to print"
+
+let println_op = function
+  | [Val.Str s] -> print_endline s; Val.Nil
+  | _ -> failwith "Non-string passed to println"
+
+let read_op = function
+  | [] -> Val.Str (read_line ())
+  | _ -> failwith "Args passed to read"
+
 let builtins =
 [ "+", num_num_op "+" (+)
 ; "-", num_num_op "-" (-)
@@ -108,6 +127,10 @@ let builtins =
 ; "apply", Val.Op("apply", apply_op)
 ; "nil?", Val.Op("nil?", nilp_op)
 ; "cons?", Val.Op("cons?", consp_op)
+; "concat", Val.Op("concat", concat_op)
+; "print", Val.Op("print", print_op)
+; "println", Val.Op("println", println_op)
+; "read", Val.Op("read", read_op)
 ]
 
 let load env = Env.extend_list builtins env

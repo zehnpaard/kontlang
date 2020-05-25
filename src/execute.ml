@@ -37,13 +37,13 @@ let eval env cont = function
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) as e ->
     let free = Utils.dedupe @@ get_free Env.empty e in
-    let fvals = List.map (fun v -> v, Env.find v env) free in
-    ApplyCont(env, cont, Val.Fn("anon", params, fvals, body))
+    let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
+    ApplyCont(env, cont, Val.Fn("anon", params, fvalsr, body))
 | Exp.LetFn(fns, e) ->
     let f (fname, params, body) =
       let free = Utils.dedupe @@ get_free (Env.add_vars Env.empty params) body in
-      let fvals = List.map (fun v -> v, Env.find v env) free in
-      (fname, Val.Fn(fname, params, fvals, body))
+      let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
+      (fname, Val.Fn(fname, params, fvalsr, body))
     in
     Eval(Env.extend_list (List.map f fns) env, Cont.Env::cont, e)
 | Exp.LetRec(fns, e) ->
@@ -52,7 +52,7 @@ let eval env cont = function
       let free = Utils.dedupe @@ get_free (Env.add_vars Env.empty (fnames @ params)) body in
       let fvals = List.map (fun v -> v, Env.find v env) free in
       let fvalsr = ref fvals in
-      let fn = Val.RecFn(fname, params, fvalsr, body) in
+      let fn = Val.Fn(fname, params, fvalsr, body) in
       ((fname, fn), fvalsr)
     in
     let fname_fns, fvalsrs = List.split @@ List.map f fns in
@@ -63,14 +63,7 @@ let apply_cont env cont v = match cont with
 | [] -> Done v
 | Cont.Call([], vs) :: cont' -> (match List.rev (v::vs) with
   | Val.Op(_, fn) :: vs' -> ApplyCont(env, cont', (fn vs'))
-  | Val.Fn(s, ss, fvals, e) :: vs' ->
-    let paramcount = List.length ss in
-    let argcount = List.length vs' in
-    if paramcount = argcount then
-      let env' = Env.extend_list (fvals @ (List.combine ss vs')) env in
-      Eval(env', Cont.Env::cont', e)
-    else failwith @@ Printf.sprintf "Function %s called with incorrect number of args: expected %d received %d" s paramcount argcount
-  | Val.RecFn(s, ss, fvalsr, e) :: vs' ->
+  | Val.Fn(s, ss, fvalsr, e) :: vs' ->
     let paramcount = List.length ss in
     let argcount = List.length vs' in
     if paramcount = argcount then

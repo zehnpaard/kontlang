@@ -8,6 +8,8 @@ let eval env cont = function
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
 | Exp.Call(e, es) -> Eval(env, Cont.Call(es, []) :: cont, e)
 | Exp.If(e1, e2, e3) -> Eval(env, Cont.If(e2, e3) :: cont, e1)
+| Exp.Cond((e1,e2)::ees) -> Eval(env, Cont.Cond(e2, ees)::cont, e1)
+| Exp.Cond _ -> failwith "Evaluating cond with no matching condition"
 | Exp.Let((s, e1)::ves, e2) -> Eval(env, Cont.Let(s, ves, [], e2) :: cont, e1)
 | Exp.Let _ -> failwith "Evaluating empty Let"
 | Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2)::Cont.Env::cont, e1)
@@ -52,6 +54,9 @@ let apply_cont env cont v = match cont with
 | Cont.If(e2, e3) :: cont' -> (match v with
   | Val.Bool b -> Eval(env, cont', if b then e2 else e3)
   | _ -> failwith "Non-boolean in condition position of If expression")
+| Cont.Cond(e, ees) :: cont' -> (match v with
+  | Val.Bool b -> Eval(env, cont', if b then e else Exp.Cond(ees))
+  | _ -> failwith "Non-boolean in condition position of Cond expression")
 | Cont.Let(s, [], vvs, e2) :: cont' ->
     let env' = Env.extend_list ((s, v)::vvs) env in
     Eval(env', Cont.Env::cont', e2)

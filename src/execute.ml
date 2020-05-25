@@ -3,29 +3,6 @@ type t =
 | Eval of Env.t * Cont.t * Exp.t
 | ApplyCont of Env.t * Cont.t * Val.t
 
-let rec get_free env = function
-| Exp.Int _ -> []
-| Exp.Var s -> if (Env.contains s env) then [] else [s]
-| Exp.Call(e, es) -> (get_free env e) @ (List.concat @@ List.map (get_free env) es) 
-| Exp.If(e1, e2, e3) -> (get_free env e1) @ (get_free env e2) @ (get_free env e3)
-| Exp.Let(ves, e2) ->
-    let vs, es = List.split ves in
-    (get_free (Env.add_vars env vs) e2) @ (List.concat @@ List.map (get_free env) es)
-| Exp.Lets((s, e1)::ves, e2) ->
-    (get_free env e1) @ (get_free (Env.add_var env s) @@ Exp.Lets(ves, e2))
-| Exp.Lets ([], e2) -> get_free env e2
-| Exp.Fn(params, body) -> get_free (Env.add_vars env params) body
-| Exp.LetFn(fns, e) ->
-    let fnames, paramss, bodys = Utils.split3 fns in
-    let f params body = get_free (Env.add_vars env params) body in
-    let free_in_fns = List.concat @@ List.map2 f paramss bodys in
-    (get_free (Env.add_vars env fnames) e) @ free_in_fns
-| Exp.LetRec(fns, e) ->
-    let fnames, paramss, bodys = Utils.split3 fns in
-    let f params body = get_free (Env.add_vars env (fnames @ params)) body in
-    let free_in_fns = List.concat @@ List.map2 f paramss bodys in
-    (get_free (Env.add_vars env fnames) e) @ free_in_fns
-
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
@@ -36,12 +13,12 @@ let eval env cont = function
 | Exp.Lets((s, e1)::ves, e2) -> Eval([]::env, Cont.Lets(s, ves, e2)::Cont.Env::cont, e1)
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) as e ->
-    let free = Utils.dedupe @@ get_free Env.empty e in
+    let free = Utils.dedupe @@ Exp.get_free [] [] e in
     let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
     ApplyCont(env, cont, Val.Fn("anon", params, fvalsr, body))
 | Exp.LetFn(fns, e) ->
     let f (fname, params, body) =
-      let free = Utils.dedupe @@ get_free (Env.add_vars Env.empty params) body in
+      let free = Utils.dedupe @@ Exp.get_free params [] body in
       let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
       (fname, Val.Fn(fname, params, fvalsr, body))
     in
@@ -49,7 +26,7 @@ let eval env cont = function
 | Exp.LetRec(fns, e) ->
     let fnames, _, _ = Utils.split3 fns in
     let f (fname, params, body) =
-      let free = Utils.dedupe @@ get_free (Env.add_vars Env.empty (fnames @ params)) body in
+      let free = Utils.dedupe @@ Exp.get_free (fnames @ params) [] body in
       let fvals = List.map (fun v -> v, Env.find v env) free in
       let fvalsr = ref fvals in
       let fn = Val.Fn(fname, params, fvalsr, body) in

@@ -12,6 +12,7 @@
 %token FN
 %token LETFN
 %token LETREC
+%token MACRO
 %token DO
 %token EOF
 
@@ -40,6 +41,7 @@ expr :
     { Exp.LetRec([fn], e) }
 | LPAREN; LETREC; LBRACK; fns = list(funcp); RBRACK; e = expr; RPAREN
     { Exp.LetRec(fns, e) }
+| LPAREN; MACRO; LBRACK; ss = list(VAR); RBRACK; e = expr; RPAREN { Exp.Macro(ss, e) }
 | LPAREN; DO; LBRACK; es = nonempty_list(expr); RBRACK; RPAREN; { Exp.Do es }
 
 var_exp :

@@ -20,6 +20,7 @@ rule f = parse
   | "fn" { Parser.FN }
   | "letfn" { Parser.LETFN }
   | "letrec" { Parser.LETREC }
+  | "macro" { Parser.MACRO }
   | "do" { Parser.DO }
   | variable as s { Parser.VAR s }
   | eof { EOF }

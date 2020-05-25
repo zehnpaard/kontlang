@@ -58,12 +58,8 @@ and to_string_fns fns =
 let rec get_free bound free = function
 | Int _ -> free
 | Var s -> if (List.mem s bound) then free else s::free
-| Call(e, es) ->
-    let es' = e::es in
-    List.fold_left (get_free bound) free es'
-| If(e1, e2, e3) ->
-    let es' = [e1; e2; e3] in
-    List.fold_left (get_free bound) free es'
+| Call(e, es) -> List.fold_left (get_free bound) free @@ e::es
+| If(e1, e2, e3) -> List.fold_left (get_free bound) free [e1; e2; e3]
 | Cond(ees) ->
     let f free (e1, e2) = get_free bound (get_free bound free e1) e2 in
     List.fold_left f free ees

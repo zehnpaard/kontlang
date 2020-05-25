@@ -6,5 +6,6 @@
     test_fn
     test_letrec
     test_cons
-    test_cond)
+    test_cond
+    test_side_effect)
   (libraries ounit2 kontlang))

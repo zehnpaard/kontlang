@@ -7,6 +7,10 @@ type cont =
 | Do of Exp.t list
 | Env
 
-type t = cont list
+type t = cont list list
 
-let final = []
+let final = [[]]
+
+let add c = function
+| cont'::cont'' -> (c::cont')::cont''
+| [] -> [[c]]

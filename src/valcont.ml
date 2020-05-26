@@ -7,7 +7,6 @@ type valt =
 | Fn of string * string list * (string * valt) list ref * Exp.t
 | Macro of string list * Exp.t
 | Cons of valt * valt
-and envt = (string * valt) list list
 and contt =
 | Call of Exp.t list * valt list
 | If of Exp.t * Exp.t
@@ -59,42 +58,6 @@ module Val = struct
     let vs_ = to_string_list vs in
     let v_ = to_string v in
     Printf.sprintf "%s . %s" vs_ v_
-end
-
-module Env = struct
-  type t = envt
-
-  let empty = [[]]
-  
-  let extend var val_ env = [(var, val_)]::env
-  let extend_current var val_ = function
-  | [] -> [[(var, val_)]]
-  | env::env' -> ((var, val_)::env)::env'
-  let extend_list vvs env = vvs :: env
-  
-  let rec find var = function
-  | [] -> failwith @@ Printf.sprintf "Variable %s not found" var
-  | []::env' -> find var env'
-  | ((var', val')::env')::env'' ->
-      if var = var' then val'
-      else find var @@ env'::env''
-  
-  let pop = function
-  | [] -> failwith "Popping empty environment"
-  | _::env' -> env'
-  
-  let rec contains var = function
-  | [] -> false
-  | []::env' -> contains var env'
-  | ((var', _)::env')::env'' ->
-      if var = var' then true
-      else contains var @@ env'::env''
-  
-  let add_var env v = extend_current v (Val.Int 0) env
-  let add_vars env vs =
-    let vvs = List.map (fun v -> (v, Val.Int 0)) vs in
-    extend_list vvs env
-  
 end
 
 module Cont = struct

@@ -115,3 +115,34 @@ let eval_string s =
   |> Parser.f Lexer.f
   |> run
   |> Val.to_string
+
+let display = function
+| Done v ->
+  print_endline "Done";
+  print_endline (Val.to_string v);
+  ignore @@ read_line ()
+| Eval(env, cont, e) ->
+  print_endline @@ "Evaluating expression " ^ Exp.to_string e;
+  print_endline @@ "Cont Head:\t" ^ Cont.to_string_hd cont;
+  print_endline  @@ "Cont Full:\t" ^ Cont.to_string cont;
+  print_endline  @@ "Environment:\t" ^ Env.to_string env;
+  ignore @@ read_line ()
+| ApplyCont(env, cont, v) ->
+  print_endline  @@ "Applying continuation on value " ^ Val.to_string v;
+  print_endline @@ "Cont Head:\t" ^ Cont.to_string_hd cont;
+  print_endline  @@ "Cont Full:\t" ^ Cont.to_string cont;
+  print_endline  @@ "Environment:\t" ^ Env.to_string env;
+  ignore @@ read_line ()
+
+let rec trampoline' res = match res with
+| Done v -> display res; v
+| Eval(env, cont, e) -> display res; trampoline' @@ eval env cont e
+| ApplyCont(env, cont, v) -> display res; trampoline' @@ apply_cont env cont v
+
+let run' e = trampoline' @@ Eval(Builtins.load Env.empty, Cont.final, e)
+
+let eval_string' s =
+  Lexing.from_string s
+  |> Parser.f Lexer.f
+  |> run'
+  |> Val.to_string

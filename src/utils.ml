@@ -14,3 +14,7 @@ let dedupe xs =
     else (Hashtbl.add hsh x 0; f (x::acc) xs')
   in
   f [] xs
+
+let rec drop_last = function
+| [] | [_] -> []
+| x::xs -> x :: (drop_last xs)

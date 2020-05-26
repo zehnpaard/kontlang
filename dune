@@ -1,3 +1,9 @@
 (executable
   (name main)
+  (modules main)
+  (libraries kontlang))
+
+(executable
+  (name stepwise)
+  (modules stepwise)
   (libraries kontlang))

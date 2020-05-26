@@ -77,4 +77,43 @@ module Cont = struct
   let add c = function
   | cont'::cont'' -> (c::cont')::cont''
   | [] -> [[c]]
+
+  let to_string_cont cont =
+  let paren x y = Printf.sprintf "(%s %s)" x y in
+  let to_string_es es = String.concat " " @@ List.map Exp.to_string es in
+  let to_string_vs vs =  String.concat " " @@ List.map Val.to_string vs in
+  let to_string_ee (e1, e2) = paren (Exp.to_string e1) (Exp.to_string e2) in
+  let to_string_se (s, e) = paren s (Exp.to_string e) in
+  let to_string_sv (s, v) = paren s (Val.to_string v) in
+  let to_string_ees ees = String.concat " " @@ List.map to_string_ee ees in
+  let to_string_ses ses = String.concat " " @@ List.map to_string_se ses in
+  let to_string_svs svs = String.concat " " @@ List.map to_string_sv svs in
+  match cont with
+  | Call(es, vs) -> Printf.sprintf "(CALL [%s] [%s])" (to_string_es es) (to_string_vs vs)
+  | If(e1, e2) -> Printf.sprintf "(IF %s %s)" (Exp.to_string e1) (Exp.to_string e2)
+  | Cond(e, ees) -> Printf.sprintf "(COND %s %s)" (Exp.to_string e) (to_string_ees ees)
+  | Let(s, ses, svs, e) ->
+      let ses_str = to_string_ses ses in
+      let svs_str = to_string_svs svs in
+      let e_str = Exp.to_string e in
+      Printf.sprintf "(LET %s [%s] [%s] %s)" s ses_str svs_str e_str
+  | Lets(s, ses, e) ->
+      let ses_str = to_string_ses ses in
+      let e_str = Exp.to_string e in
+      Printf.sprintf "(LETS %s [%s] %s)" s ses_str e_str
+  | Do(es) -> Printf.sprintf "(DO [%s])" @@ to_string_es es
+  | Env -> "(ENV)"
+
+  let to_string_cont_short = function
+  | Call _ -> "CALL"
+  | If _ -> "IF"
+  | Cond _ -> "COND"
+  | Let _ -> "LET"
+  | Lets _ -> "LETS"
+  | Do _ -> "DO"
+  | Env -> "ENV"
+
+  let to_string cont =
+    let f xs = String.concat " " @@ List.map to_string_cont_short xs in
+    String.concat " | " @@ List.map f cont
 end

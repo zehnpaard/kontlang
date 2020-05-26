@@ -78,6 +78,11 @@ module Cont = struct
   | cont'::cont'' -> (c::cont')::cont''
   | [] -> [[c]]
 
+  let hd_opt = function
+  | [] -> None
+  | []::_ -> None
+  | (x::_)::_ -> Some x
+
   let to_string_cont cont =
   let paren x y = Printf.sprintf "(%s %s)" x y in
   let to_string_es es = String.concat " " @@ List.map Exp.to_string es in
@@ -116,4 +121,8 @@ module Cont = struct
   let to_string cont =
     let f xs = String.concat " " @@ List.map to_string_cont_short xs in
     String.concat " | " @@ List.map f cont
+
+  let to_string_hd cont = match hd_opt cont with
+  | None -> ""
+  | Some x -> to_string_cont x
 end

@@ -1,6 +1,6 @@
 type t = (string * Val.t) list list
 
-let empty = [[]]
+let empty = []
 
 let extend var val_ env = [(var, val_)]::env
 let extend_current var val_ = function
@@ -30,3 +30,8 @@ let add_var env v = extend_current v (Val.Int 0) env
 let add_vars env vs =
   let vvs = List.map (fun v -> (v, Val.Int 0)) vs in
   extend_list vvs env
+
+let to_string env =
+  let f (s, v) = Printf.sprintf "{%s %s}" s (Val.to_string v) in
+  let g svs = Printf.sprintf "[%s]" @@ String.concat " " @@ List.map f svs in
+  String.concat " | " @@ List.map g @@ Utils.drop_last env

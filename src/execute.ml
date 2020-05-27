@@ -3,6 +3,10 @@ type t =
 | Eval of Env.t * Cont.t * Exp.t
 | ApplyCont of Env.t * Cont.t * Val.t
 
+let rec tco env = function
+| (Cont.Env::cont)::cont' -> tco (Env.pop env) @@ cont::cont'
+| cont -> env, cont
+
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
@@ -76,8 +80,9 @@ let apply_cont env cont v = match cont with
     let paramcount = List.length ss in
     let argcount = List.length vs' in
     if paramcount = argcount then
-      let env' = Env.extend_list (!fvalsr @ (List.combine ss vs')) env in
-      Eval(env', Cont.add Cont.Env (cont'::cont''), e)
+      let env', cont''' = tco env @@ cont'::cont'' in
+      let env'' = Env.extend_list (!fvalsr @ (List.combine ss vs')) env' in
+      Eval(env'', Cont.add Cont.Env cont''', e)
     else failwith @@ Printf.sprintf "Function %s called with incorrect number of args: expected %d received %d" s paramcount argcount
   | _ -> failwith "Calling non-callable in operator position")
 | (Cont.If(e2, e3) :: cont')::cont'' -> (match v with

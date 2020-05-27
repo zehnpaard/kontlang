@@ -94,20 +94,20 @@ module Cont = struct
   let to_string_ses ses = String.concat " " @@ List.map to_string_se ses in
   let to_string_svs svs = String.concat " " @@ List.map to_string_sv svs in
   match cont with
-  | Call(es, vs) -> Printf.sprintf "(CALL [%s] [%s])" (to_string_es es) (to_string_vs vs)
-  | If(e1, e2) -> Printf.sprintf "(IF %s %s)" (Exp.to_string e1) (Exp.to_string e2)
-  | Cond(e, ees) -> Printf.sprintf "(COND %s %s)" (Exp.to_string e) (to_string_ees ees)
+  | Call(es, vs) -> Printf.sprintf "CALL [%s] [%s]" (to_string_es es) (to_string_vs vs)
+  | If(e1, e2) -> Printf.sprintf "IF %s %s" (Exp.to_string e1) (Exp.to_string e2)
+  | Cond(e, ees) -> Printf.sprintf "COND %s %s" (Exp.to_string e) (to_string_ees ees)
   | Let(s, ses, svs, e) ->
       let ses_str = to_string_ses ses in
       let svs_str = to_string_svs svs in
       let e_str = Exp.to_string e in
-      Printf.sprintf "(LET %s [%s] [%s] %s)" s ses_str svs_str e_str
+      Printf.sprintf "LET %s [%s] [%s] %s" s ses_str svs_str e_str
   | Lets(s, ses, e) ->
       let ses_str = to_string_ses ses in
       let e_str = Exp.to_string e in
-      Printf.sprintf "(LETS %s [%s] %s)" s ses_str e_str
-  | Do(es) -> Printf.sprintf "(DO [%s])" @@ to_string_es es
-  | Env -> "(ENV)"
+      Printf.sprintf "LETS %s [%s] %s" s ses_str e_str
+  | Do(es) -> Printf.sprintf "DO [%s]" @@ to_string_es es
+  | Env -> "ENV"
 
   let to_string_cont_short = function
   | Call _ -> "CALL"

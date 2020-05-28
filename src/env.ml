@@ -17,6 +17,10 @@ let rec find var = function
 
 let pop = function
 | [] -> failwith "Popping empty environment"
+| svs::env -> svs, env
+
+let rest = function
+| [] -> failwith "Taking rest of empty environment"
 | _::env' -> env'
 
 let rec contains var = function

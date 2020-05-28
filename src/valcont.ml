@@ -7,6 +7,7 @@ type valt =
 | Fn of string * string list * (string * valt) list ref * Exp.t
 | Macro of string list * Exp.t
 | Cons of valt * valt
+| Cont of string * (string * valt) list * contt list
 and contt =
 | Call of Exp.t list * valt list
 | If of Exp.t * Exp.t
@@ -26,6 +27,7 @@ module Val = struct
   | Fn of string * string list * (string * valt) list ref * Exp.t
   | Macro of string list * Exp.t
   | Cons of valt * valt
+  | Cont of string * (string * valt) list * contt list
 
   let rec is_list = function
   | Nil -> true
@@ -53,6 +55,7 @@ module Val = struct
   | Cons _ as v ->
       Printf.sprintf "(%s)" (if is_list v then (to_string_list @@ cons_to_list v)
                              else (to_string_dotted_list @@ cons_to_dotted_list [] v))
+  | Cont(s, _, _) ->  Printf.sprintf "Cont(%s)" s
   and to_string_list vs = String.concat " " @@ List.map to_string vs
   and to_string_dotted_list (vs, v) =
     let vs_ = to_string_list vs in

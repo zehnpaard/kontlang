@@ -26,3 +26,7 @@ let break_off n xs =
     | [] -> failwith "Not enough elements in list to break off"
     | x::xs' -> f (n-1) (x::acc) xs'
   in f n [] xs
+
+let rec count y = function
+| [] -> 0
+| x::xs -> (if x = y then 1 else 0) + count y xs

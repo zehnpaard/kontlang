@@ -105,7 +105,7 @@ let apply_cont env cont v = match cont with
       let env' = List.fold_left f env (List.rev svss) in
       ApplyCont(env', final_cont, v)
     else failwith @@ Printf.sprintf "Continuation %s called with incorrect number of args: expected 1 received %d" s argcount
-  | _ -> failwith "Calling non-callable in operator position")
+  | vs' -> failwith @@ Printf.sprintf "Calling non-callable %s in operator position" (Val.to_string @@ List.hd vs'))
 | (Cont.If(e2, e3) :: cont')::cont'' -> (match v with
   | Val.Bool b -> Eval(env, cont'::cont'', if b then e2 else e3)
   | _ -> failwith "Non-boolean in condition position of If expression")

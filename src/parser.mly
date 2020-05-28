@@ -14,6 +14,8 @@
 %token LETREC
 %token MACRO
 %token DO
+%token RESET
+%token SHIFT
 %token EOF
 
 %start <Exp.t> f
@@ -43,6 +45,8 @@ expr :
     { Exp.LetRec(fns, e) }
 | LPAREN; MACRO; LBRACK; ss = list(VAR); RBRACK; e = expr; RPAREN { Exp.Macro(ss, e) }
 | LPAREN; DO; LBRACK; es = nonempty_list(expr); RBRACK; RPAREN; { Exp.Do es }
+| LPAREN; RESET; e = expr; RPAREN { Exp.Reset e }
+| LPAREN; SHIFT; LBRACK; s = VAR; RBRACK; e = expr; RPAREN { Exp.Shift(s, e) }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }

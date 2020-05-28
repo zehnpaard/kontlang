@@ -7,7 +7,7 @@ type valt =
 | Fn of string * string list * (string * valt) list ref * Exp.t
 | Macro of string list * Exp.t
 | Cons of valt * valt
-| Cont of string * (string * valt) list * contt list
+| Cont of string * (string * valt) list list * contt list
 and contt =
 | Call of Exp.t list * valt list
 | If of Exp.t * Exp.t
@@ -27,7 +27,7 @@ module Val = struct
   | Fn of string * string list * (string * valt) list ref * Exp.t
   | Macro of string list * Exp.t
   | Cons of valt * valt
-  | Cont of string * (string * valt) list * contt list
+  | Cont of string * (string * valt) list list * contt list
 
   let rec is_list = function
   | Nil -> true

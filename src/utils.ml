@@ -18,3 +18,11 @@ let dedupe xs =
 let rec drop_last = function
 | [] | [_] -> []
 | x::xs -> x :: (drop_last xs)
+
+let break_off n xs =
+  let rec f n acc xs =
+    if n = 0 then List.rev acc, xs
+    else match xs with
+    | [] -> failwith "Not enough elements in list to break off"
+    | x::xs' -> f (n-1) (x::acc) xs'
+  in f n [] xs

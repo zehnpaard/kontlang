@@ -128,4 +128,8 @@ module Cont = struct
   let to_string_hd cont = match hd_opt cont with
   | None -> ""
   | Some x -> to_string_cont x
+
+  let pop = function
+  | [] -> failwith "Popping empty continuation"
+  | cont::cont' -> cont, cont'
 end

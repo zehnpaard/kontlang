@@ -2,7 +2,7 @@
 Language with Clojure-like syntax and semantics based on EoPL + Shift/Reset, implemented in OCaml
 
 ## Instructions for use
-Recommendation for installing dependencies is [`OPAM`](https://opam.ocaml.org).
+Recommendation for installing dependencies is [`OPAM`](https://opam.ocaml.org), the defacto standard OCaml package manager.
 
 Once OPAM is installed and configured (`opam init` & `eval $(opam config env)` - see OPAM website for further details), run:
 

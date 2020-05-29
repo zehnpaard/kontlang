@@ -21,5 +21,7 @@ let substitute e ss es =
   | Exp.LetRec(fns, e) ->
       Exp.LetRec(List.map (fun (v, ps, e) -> (v, ps, f e)) fns, f e)
   | Exp.Do es -> Exp.Do (List.map f es)
+  | Exp.Reset e -> Exp.Reset (f e)
+  | Exp.Shift(s, e) -> Exp.Shift(s, f e)
 in
 f e

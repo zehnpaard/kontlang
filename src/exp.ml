@@ -12,6 +12,8 @@ type t =
 | LetRec of (string * string list * t) list * t
 | Macro of string list * t
 | Do of t list
+| Reset of t
+| Shift of string * t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -51,6 +53,8 @@ let rec to_string = function
 | Do es -> Printf.sprintf "(do [%s])" @@ String.concat " " @@ List.map to_string es
 | Macro(params, body) ->
     Printf.sprintf "(macro [%s] %s)" (String.concat " " params) (to_string body)
+| Reset e -> Printf.sprintf "(reset %s)" @@ to_string e
+| Shift(s, e) -> Printf.sprintf "(shift [%s] %s)" s @@ to_string e
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "
@@ -90,3 +94,5 @@ let rec get_free bound free = function
     let free' = List.fold_left2 f free paramss bodys in
     get_free (fnames @ bound) free' e
 | Do es -> List.fold_left (get_free bound) free es
+| Reset e -> get_free bound free e
+| Shift(s, e) -> get_free (s::bound) free e

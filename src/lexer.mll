@@ -22,5 +22,7 @@ rule f = parse
   | "letrec" { Parser.LETREC }
   | "macro" { Parser.MACRO }
   | "do" { Parser.DO }
+  | "reset" { Parser.RESET }
+  | "shift" { Parser.SHIFT }
   | variable as s { Parser.VAR s }
   | eof { EOF }

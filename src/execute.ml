@@ -4,7 +4,7 @@ type t =
 | ApplyCont of Env.t * Cont.t * Val.t
 
 let rec tco env = function
-| (Cont.Env::cont)::cont' -> tco (Env.pop env) @@ cont::cont'
+| (Cont.Env::cont)::cont' -> tco (Env.rest env) @@ cont::cont'
 | cont -> env, cont
 
 let eval env cont = function
@@ -57,10 +57,23 @@ let eval env cont = function
     let cont' = Cont.add (Cont.Do es) cont in
     Eval(env, cont', e)
   | Exp.Do([]) -> failwith "Evaluating empty do"
+  | Exp.Reset e ->
+    let free = Utils.dedupe @@ Exp.get_free [] [] e in
+    let fvals = List.map (fun v -> v, Env.find v env) free in
+    Eval(Env.extend_list fvals env, []::cont, e)
+  | Exp.Shift(s, e) ->
+    let free = Utils.dedupe @@ Exp.get_free [s] [] e in
+    let fvals = List.map (fun v -> v, Env.find v env) free in
+    let cont', cont'' = Cont.pop cont in
+    let n = 1 + Utils.count Cont.Env cont' in
+    let env', env'' = Utils.break_off n env in
+    let contv = Val.Cont(s, env', cont') in
+    let closure = (s, contv)::fvals in
+    Eval(Env.extend_list closure env'', []::cont'', e)
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
-| []::cont'' -> ApplyCont(env, cont'', v)
+| []::cont'' -> ApplyCont((Env.rest env), cont'', v)
 | (Cont.Call(e::es as es', [])::cont')::cont'' -> (match v with
   | Val.Macro (ss, me) ->
       let paramcount = List.length ss in
@@ -84,7 +97,15 @@ let apply_cont env cont v = match cont with
       let env'' = Env.extend_list (!fvalsr @ (List.combine ss vs')) env' in
       Eval(env'', Cont.add Cont.Env cont''', e)
     else failwith @@ Printf.sprintf "Function %s called with incorrect number of args: expected %d received %d" s paramcount argcount
-  | _ -> failwith "Calling non-callable in operator position")
+  | Val.Cont(s, svss, cont''') :: vs' ->
+    let argcount = List.length vs' in
+    if argcount = 1 then
+      let final_cont = cont'''::cont'::cont'' in
+      let f env svs = Env.extend_list svs env in
+      let env' = List.fold_left f env (List.rev svss) in
+      ApplyCont(env', final_cont, v)
+    else failwith @@ Printf.sprintf "Continuation %s called with incorrect number of args: expected 1 received %d" s argcount
+  | vs' -> failwith @@ Printf.sprintf "Calling non-callable %s in operator position" (Val.to_string @@ List.hd vs'))
 | (Cont.If(e2, e3) :: cont')::cont'' -> (match v with
   | Val.Bool b -> Eval(env, cont'::cont'', if b then e2 else e3)
   | _ -> failwith "Non-boolean in condition position of If expression")
@@ -106,14 +127,14 @@ let apply_cont env cont v = match cont with
     let cont''' = Cont.add (Cont.Do es) (cont'::cont'') in
     Eval(env, cont''', e)
 | (Cont.Do([])::cont')::cont'' -> ApplyCont(env, cont'::cont'', v)
-| (Cont.Env :: cont')::cont'' -> ApplyCont (Env.pop env, cont'::cont'', v)
+| (Cont.Env :: cont')::cont'' -> ApplyCont (Env.rest env, cont'::cont'', v)
 
 let rec trampoline = function
 | Done v -> v
 | Eval(env, cont, e) -> trampoline @@ eval env cont e
 | ApplyCont(env, cont, v) -> trampoline @@ apply_cont env cont v
 
-let run e = trampoline @@ Eval(Builtins.load Env.empty, Cont.final, e)
+let run e = trampoline @@ Eval(Builtins.load Env.empty, Cont.final, Exp.Reset e)
 
 let eval_string s =
   Lexing.from_string s
@@ -144,7 +165,7 @@ let rec trampoline' res = match res with
 | Eval(env, cont, e) -> display res; trampoline' @@ eval env cont e
 | ApplyCont(env, cont, v) -> display res; trampoline' @@ apply_cont env cont v
 
-let run' e = trampoline' @@ Eval(Builtins.load Env.empty, Cont.final, e)
+let run' e = trampoline' @@ Eval(Builtins.load Env.empty, Cont.final, Exp.Reset e)
 
 let eval_string' s =
   Lexing.from_string s

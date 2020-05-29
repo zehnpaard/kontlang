@@ -103,6 +103,12 @@ let read_op = function
   | [] -> Val.Str (read_line ())
   | _ -> failwith "Args passed to read"
 
+let to_string_op = function
+| [v] -> Val.Str (Val.to_string v)
+| [] -> failwith "0 args passed to to_string"
+| _ -> failwith "More than 1 arg passed to to_string"
+
+
 let builtins =
 [ "+", num_num_op "+" (+)
 ; "-", num_num_op "-" (-)
@@ -131,6 +137,7 @@ let builtins =
 ; "print", Val.Op("print", print_op)
 ; "println", Val.Op("println", println_op)
 ; "read", Val.Op("read", read_op)
+; "to_string", Val.Op("to_string", to_string_op)
 ]
 
 let load env = Env.extend_list builtins env

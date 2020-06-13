@@ -7,6 +7,7 @@ let substitute e ss es =
   | Exp.Var s as e -> (match List.assoc_opt s env with
     | Some e' -> e'
     | None -> e)
+  | Exp.MVar _ as x -> x
   | Exp.Call(e, es) -> Exp.Call(f e, List.map f es)
   | Exp.If(e1, e2, e3) -> Exp.If(f e1, f e2, f e3)
   | Exp.Cond(ees) ->

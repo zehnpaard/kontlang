@@ -2,6 +2,7 @@ type t =
 | Int of int
 | Str of string
 | Var of string
+| MVar of string list
 | Call of t * t list
 | If of t * t * t
 | Cond of (t * t) list
@@ -14,11 +15,14 @@ type t =
 | Do of t list
 | Reset of t
 | Shift of string * t
+| Define of string * t
+| Module of t list
 
 let rec to_string = function
 | Int n -> string_of_int n
 | Str s -> Printf.sprintf "\"%s\"" s
 | Var s -> s
+| MVar ss -> String.concat "." ss
 | Call(e, []) -> Printf.sprintf "(%s)" @@ to_string e 
 | Call(e, es) ->
     let fn = to_string e in
@@ -55,6 +59,8 @@ let rec to_string = function
     Printf.sprintf "(macro [%s] %s)" (String.concat " " params) (to_string body)
 | Reset e -> Printf.sprintf "(reset %s)" @@ to_string e
 | Shift(s, e) -> Printf.sprintf "(shift [%s] %s)" s @@ to_string e
+| Define(s, e) -> Printf.sprintf "(define %s %s)" s @@ to_string e
+| Module es -> Printf.sprintf "(module [%s])" @@ String.concat " " @@ List.map to_string es
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "
@@ -69,6 +75,8 @@ and to_string_fns fns =
 let rec get_free bound free = function
 | Int _ | Str _ | Macro _ -> free
 | Var s -> if (List.mem s bound) then free else s::free
+| MVar [] -> free
+| MVar(s::_) -> if (List.mem s bound) then free else s::free
 | Call(e, es) -> List.fold_left (get_free bound) free @@ e::es
 | If(e1, e2, e3) -> List.fold_left (get_free bound) free [e1; e2; e3]
 | Cond(ees) ->
@@ -96,3 +104,7 @@ let rec get_free bound free = function
 | Do es -> List.fold_left (get_free bound) free es
 | Reset e -> get_free bound free e
 | Shift(s, e) -> get_free (s::bound) free e
+| Define(_, e) -> get_free bound free e
+| Module [] -> free
+| Module((Define(s,e))::es) -> get_free (s::bound) (get_free bound free e) (Module es)
+| Module(e::es) -> get_free bound (get_free bound free e) (Module es)

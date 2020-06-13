@@ -10,6 +10,17 @@ let rec tco env = function
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
+| Exp.MVar([]) -> failwith "Evaluating invalid/empty module var"
+| Exp.MVar(s::ss) ->
+  let m = Env.find s env in
+  let f m s = match m with
+  | Val.Module svs -> (match List.assoc_opt s svs with
+    | Some n -> n
+    | None -> failwith @@ Printf.sprintf "Member %s of module does not exist" s)
+  | _ -> failwith @@ "Accessing member of non-module"
+  in
+  let v = List.fold_left f m ss in
+  ApplyCont(env, cont, v)
 | Exp.Str s -> ApplyCont(env, cont, Val.Str s)
 | Exp.Call(e, es) ->
   let cont' = Cont.add (Cont.Call(es, [])) cont in
@@ -30,46 +41,56 @@ let eval env cont = function
   Eval([]::env, cont', e1)
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) as e ->
-    let free = Utils.dedupe @@ Exp.get_free [] [] e in
-    let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
-    ApplyCont(env, cont, Val.Fn("anon", params, fvalsr, body))
+  let free = Utils.dedupe @@ Exp.get_free [] [] e in
+  let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
+  ApplyCont(env, cont, Val.Fn("anon", params, fvalsr, body))
 | Exp.LetFn(fns, e) ->
-    let f (fname, params, body) =
-      let free = Utils.dedupe @@ Exp.get_free params [] body in
-      let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
-      (fname, Val.Fn(fname, params, fvalsr, body))
-    in
-    Eval(Env.extend_list (List.map f fns) env, Cont.add Cont.Env cont, e)
+  let f (fname, params, body) =
+    let free = Utils.dedupe @@ Exp.get_free params [] body in
+    let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
+    (fname, Val.Fn(fname, params, fvalsr, body))
+  in
+  Eval(Env.extend_list (List.map f fns) env, Cont.add Cont.Env cont, e)
 | Exp.LetRec(fns, e) ->
-    let fnames, _, _ = Utils.split3 fns in
-    let f (fname, params, body) =
-      let free = Utils.dedupe @@ Exp.get_free (fnames @ params) [] body in
-      let fvals = List.map (fun v -> v, Env.find v env) free in
-      let fvalsr = ref fvals in
-      let fn = Val.Fn(fname, params, fvalsr, body) in
-      ((fname, fn), fvalsr)
-    in
-    let fname_fns, fvalsrs = List.split @@ List.map f fns in
-    List.iter (fun fvalsr -> (fvalsr := (fname_fns @ !fvalsr))) fvalsrs;
-    Eval(Env.extend_list fname_fns env, Cont.add Cont.Env cont, e)
-  | Exp.Macro(ss, e) -> ApplyCont(env, cont, Val.Macro(ss, e))
-  | Exp.Do(e::es) ->
-    let cont' = Cont.add (Cont.Do es) cont in
-    Eval(env, cont', e)
-  | Exp.Do([]) -> failwith "Evaluating empty do"
-  | Exp.Reset e ->
-    let free = Utils.dedupe @@ Exp.get_free [] [] e in
+  let fnames, _, _ = Utils.split3 fns in
+  let f (fname, params, body) =
+    let free = Utils.dedupe @@ Exp.get_free (fnames @ params) [] body in
     let fvals = List.map (fun v -> v, Env.find v env) free in
-    Eval(Env.extend_list fvals env, []::cont, e)
-  | Exp.Shift(s, e) ->
-    let free = Utils.dedupe @@ Exp.get_free [s] [] e in
-    let fvals = List.map (fun v -> v, Env.find v env) free in
-    let cont', cont'' = Cont.pop cont in
-    let n = 1 + Utils.count Cont.Env cont' in
-    let env', env'' = Utils.break_off n env in
-    let contv = Val.Cont(s, env', cont') in
-    let closure = (s, contv)::fvals in
-    Eval(Env.extend_list closure env'', []::cont'', e)
+    let fvalsr = ref fvals in
+    let fn = Val.Fn(fname, params, fvalsr, body) in
+    ((fname, fn), fvalsr)
+  in
+  let fname_fns, fvalsrs = List.split @@ List.map f fns in
+  List.iter (fun fvalsr -> (fvalsr := (fname_fns @ !fvalsr))) fvalsrs;
+  Eval(Env.extend_list fname_fns env, Cont.add Cont.Env cont, e)
+| Exp.Macro(ss, e) -> ApplyCont(env, cont, Val.Macro(ss, e))
+| Exp.Do(e::es) ->
+  let cont' = Cont.add (Cont.Do es) cont in
+  Eval(env, cont', e)
+| Exp.Do([]) -> failwith "Evaluating empty do"
+| Exp.Reset e ->
+  let free = Utils.dedupe @@ Exp.get_free [] [] e in
+  let fvals = List.map (fun v -> v, Env.find v env) free in
+  Eval(Env.extend_list fvals env, []::cont, e)
+| Exp.Shift(s, e) ->
+  let free = Utils.dedupe @@ Exp.get_free [s] [] e in
+  let fvals = List.map (fun v -> v, Env.find v env) free in
+  let cont', cont'' = Cont.pop cont in
+  let n = 1 + Utils.count Cont.Env cont' in
+  let env', env'' = Utils.break_off n env in
+  let contv = Val.Cont(s, env', cont') in
+  let closure = (s, contv)::fvals in
+  Eval(Env.extend_list closure env'', []::cont'', e)
+| Exp.Define _ -> failwith "Define used outside of Module definition"
+| Exp.Module(Exp.Define(s, e)::es) ->
+  let env' = []::env in
+  let cont' = Cont.add (Cont.ModuleDefine(s, es, [])) @@ Cont.add Cont.Env cont in
+  Eval(env', cont', e)
+| Exp.Module(e::es) ->
+  let env' = []::env in
+  let cont' = Cont.add (Cont.ModuleExp(es, [])) @@ Cont.add Cont.Env cont in
+  Eval(env', cont', e)
+| Exp.Module [] -> ApplyCont(env, cont, Val.Module [])
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
@@ -127,6 +148,24 @@ let apply_cont env cont v = match cont with
     let cont''' = Cont.add (Cont.Do es) (cont'::cont'') in
     Eval(env, cont''', e)
 | (Cont.Do([])::cont')::cont'' -> ApplyCont(env, cont'::cont'', v)
+| (Cont.ModuleDefine(s, [], svs)::cont')::cont'' ->
+    ApplyCont(env, cont'::cont'', Val.Module((s, v)::svs))
+| (Cont.ModuleDefine(s, Exp.Define(s', e')::es, svs)::cont')::cont'' ->
+    let env' = Env.extend_current s v env in
+    let cont''' = Cont.add (Cont.ModuleDefine(s', es, (s,v)::svs)) (cont'::cont'')in
+    Eval(env', cont''', e')
+| (Cont.ModuleDefine(s, e::es, svs)::cont')::cont'' ->
+    let env' = Env.extend_current s v env in
+    let cont''' = Cont.add (Cont.ModuleExp(es, (s,v)::svs)) (cont'::cont'')in
+    Eval(env', cont''', e)
+| (Cont.ModuleExp([], svs)::cont')::cont'' ->
+    ApplyCont(env, cont'::cont'', Val.Module svs)
+| (Cont.ModuleExp(Exp.Define(s', e')::es, svs)::cont')::cont'' ->
+    let cont''' = Cont.add (Cont.ModuleDefine(s', es, svs)) (cont'::cont'')in
+    Eval(env, cont''', e')
+| (Cont.ModuleExp(e::es, svs)::cont')::cont'' ->
+    let cont''' = Cont.add (Cont.ModuleExp(es, svs)) (cont'::cont'')in
+    Eval(env, cont''', e)
 | (Cont.Env :: cont')::cont'' -> ApplyCont (Env.rest env, cont'::cont'', v)
 
 let rec trampoline = function

@@ -1,5 +1,6 @@
 %token <int> INT
 %token <string> VAR
+%token <string list> MVAR
 %token <string> STR
 %token LPAREN
 %token RPAREN
@@ -16,6 +17,8 @@
 %token DO
 %token RESET
 %token SHIFT
+%token DEFINE
+%token MODULE
 %token EOF
 
 %start <Exp.t> f
@@ -27,6 +30,7 @@ f : e = expr; EOF { e }
 expr :
 | n = INT; { Exp.Int n }
 | s = VAR; { Exp.Var s }
+| ss = MVAR; { Exp.MVar ss }
 | s = STR; { Exp.Str s }
 | LPAREN; e = expr; es = list (expr); RPAREN { Exp.Call(e, es) }
 | LPAREN; IF; e1 = expr; e2 = expr; e3 = expr; RPAREN { Exp.If(e1, e2, e3) }
@@ -47,6 +51,11 @@ expr :
 | LPAREN; DO; LBRACK; es = nonempty_list(expr); RBRACK; RPAREN; { Exp.Do es }
 | LPAREN; RESET; e = expr; RPAREN { Exp.Reset e }
 | LPAREN; SHIFT; LBRACK; s = VAR; RBRACK; e = expr; RPAREN { Exp.Shift(s, e) }
+| LPAREN; MODULE; LBRACK; es = nonempty_list(module_expr); RBRACK; RPAREN { Exp.Module es }
+
+module_expr :
+| e = expr { e }
+| LPAREN; DEFINE; s = VAR; e = expr; RPAREN { Exp.Define(s, e) }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }

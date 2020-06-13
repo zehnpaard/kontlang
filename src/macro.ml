@@ -23,5 +23,7 @@ let substitute e ss es =
   | Exp.Do es -> Exp.Do (List.map f es)
   | Exp.Reset e -> Exp.Reset (f e)
   | Exp.Shift(s, e) -> Exp.Shift(s, f e)
+  | Exp.Define(s, e) -> Exp.Define(s, f e)
+  | Exp.Module es -> Exp.Module (List.map f es)
 in
 f e

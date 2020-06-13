@@ -8,5 +8,6 @@
     test_cons
     test_cond
     test_side_effect
-    test_macro)
+    test_macro
+    test_module)
   (libraries ounit2 kontlang))

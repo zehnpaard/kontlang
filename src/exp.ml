@@ -15,6 +15,7 @@ type t =
 | Reset of t
 | Shift of string * t
 | Define of string * t
+| Module of t list
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -57,6 +58,7 @@ let rec to_string = function
 | Reset e -> Printf.sprintf "(reset %s)" @@ to_string e
 | Shift(s, e) -> Printf.sprintf "(shift [%s] %s)" s @@ to_string e
 | Define(s, e) -> Printf.sprintf "(define %s %s)" s @@ to_string e
+| Module es -> Printf.sprintf "(module [%s])" @@ String.concat " " @@ List.map to_string es
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "
@@ -99,3 +101,6 @@ let rec get_free bound free = function
 | Reset e -> get_free bound free e
 | Shift(s, e) -> get_free (s::bound) free e
 | Define(_, e) -> get_free bound free e
+| Module [] -> free
+| Module((Define(s,e))::es) -> get_free (s::bound) (get_free bound free e) (Module es)
+| Module(e::es) -> get_free bound (get_free bound free e) (Module es)

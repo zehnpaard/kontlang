@@ -3,6 +3,7 @@ let digit = ['0'-'9']
 let char = ['a'-'z' 'A'-'Z' '+' '-' '*' '/' '<' '>' '=' '!' '?' '_']
 let number = ('0'|['1'-'9'] digit*)
 let variable = char (char|digit)*
+let mvariable = variable '.' variable ('.' variable)*
 let string = '"' + (' '|char|number)* '"'
 
 rule f = parse
@@ -26,5 +27,6 @@ rule f = parse
   | "shift" { Parser.SHIFT }
   | "define" { Parser.DEFINE }
   | "module" { Parser.MODULE }
+  | mvariable as s { Parser.MVAR (String.split_on_char '.' s) }
   | variable as s { Parser.VAR s }
   | eof { EOF }

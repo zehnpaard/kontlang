@@ -16,6 +16,8 @@
 %token DO
 %token RESET
 %token SHIFT
+%token DEFINE
+%token MODULE
 %token EOF
 
 %start <Exp.t> f
@@ -47,6 +49,11 @@ expr :
 | LPAREN; DO; LBRACK; es = nonempty_list(expr); RBRACK; RPAREN; { Exp.Do es }
 | LPAREN; RESET; e = expr; RPAREN { Exp.Reset e }
 | LPAREN; SHIFT; LBRACK; s = VAR; RBRACK; e = expr; RPAREN { Exp.Shift(s, e) }
+| LPAREN; MODULE; LBRACK; es = nonempty_list(module_expr); RBRACK; RPAREN { Exp.Module es }
+
+module_expr :
+| expr
+| LPAREN; DEFINE; s = VAR; e = expr; RPAREN { Exp.Define(s, e) }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }

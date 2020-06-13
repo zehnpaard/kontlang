@@ -24,5 +24,7 @@ rule f = parse
   | "do" { Parser.DO }
   | "reset" { Parser.RESET }
   | "shift" { Parser.SHIFT }
+  | "define" { Parser.DEFINE }
+  | "module" { Parser.MODULE }
   | variable as s { Parser.VAR s }
   | eof { EOF }

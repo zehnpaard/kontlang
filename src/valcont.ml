@@ -8,6 +8,7 @@ type valt =
 | Macro of string list * Exp.t
 | Cons of valt * valt
 | Cont of string * (string * valt) list list * contt list
+| Module of (string * valt) list
 and contt =
 | Call of Exp.t list * valt list
 | If of Exp.t * Exp.t
@@ -15,6 +16,8 @@ and contt =
 | Let of string * (string * Exp.t) list * (string * valt) list * Exp.t
 | Lets of string * (string * Exp.t) list * Exp.t
 | Do of Exp.t list
+| ModuleExp of Exp.t list * (string * valt) list
+| ModuleDefine of string * Exp.t list * (string * valt) list
 | Env
 
 module Val = struct
@@ -28,6 +31,7 @@ module Val = struct
   | Macro of string list * Exp.t
   | Cons of valt * valt
   | Cont of string * (string * valt) list list * contt list
+  | Module of (string * valt) list
 
   let rec is_list = function
   | Nil -> true
@@ -56,6 +60,7 @@ module Val = struct
       Printf.sprintf "(%s)" (if is_list v then (to_string_list @@ cons_to_list v)
                              else (to_string_dotted_list @@ cons_to_dotted_list [] v))
   | Cont(s, _, _) ->  Printf.sprintf "Cont(%s)" s
+  | Module _ -> "Module()"
   and to_string_list vs = String.concat " " @@ List.map to_string vs
   and to_string_dotted_list (vs, v) =
     let vs_ = to_string_list vs in
@@ -71,6 +76,8 @@ module Cont = struct
   | Let of string * (string * Exp.t) list * (string * Val.t) list * Exp.t
   | Lets of string * (string * Exp.t) list * Exp.t
   | Do of Exp.t list
+  | ModuleExp of Exp.t list * (string * valt) list
+  | ModuleDefine of string * Exp.t list * (string * valt) list
   | Env
   
   type t = cont list list
@@ -110,6 +117,14 @@ module Cont = struct
       let e_str = Exp.to_string e in
       Printf.sprintf "LETS %s [%s] %s" s ses_str e_str
   | Do(es) -> Printf.sprintf "DO [%s]" @@ to_string_es es
+  | ModuleExp(es, svs) ->
+      let es_str = to_string_es es in
+      let svs_str = to_string_svs svs in
+      Printf.sprintf "MODULE_EXP [%s] [%s]" es_str svs_str
+  | ModuleDefine(s, es, svs) ->
+      let es_str = to_string_es es in
+      let svs_str = to_string_svs svs in
+      Printf.sprintf "MODULE_DEFINE %s [%s] [%s]" s es_str svs_str
   | Env -> "ENV"
 
   let to_string_cont_short = function
@@ -120,6 +135,8 @@ module Cont = struct
   | Lets _ -> "LETS"
   | Do _ -> "DO"
   | Env -> "ENV"
+  | ModuleExp _ -> "MODULE_EXP"
+  | ModuleDefine _ -> "MODULE_DEFINE"
 
   let to_string cont =
     let f xs = String.concat " " @@ List.map to_string_cont_short xs in

@@ -52,7 +52,7 @@ expr :
 | LPAREN; MODULE; LBRACK; es = nonempty_list(module_expr); RBRACK; RPAREN { Exp.Module es }
 
 module_expr :
-| expr
+| e = expr { e }
 | LPAREN; DEFINE; s = VAR; e = expr; RPAREN { Exp.Define(s, e) }
 
 var_exp :

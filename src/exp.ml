@@ -2,6 +2,7 @@ type t =
 | Int of int
 | Str of string
 | Var of string
+| MVar of string list
 | Call of t * t list
 | If of t * t * t
 | Cond of (t * t) list
@@ -21,6 +22,7 @@ let rec to_string = function
 | Int n -> string_of_int n
 | Str s -> Printf.sprintf "\"%s\"" s
 | Var s -> s
+| MVar ss -> String.concat "." ss
 | Call(e, []) -> Printf.sprintf "(%s)" @@ to_string e 
 | Call(e, es) ->
     let fn = to_string e in
@@ -73,6 +75,8 @@ and to_string_fns fns =
 let rec get_free bound free = function
 | Int _ | Str _ | Macro _ -> free
 | Var s -> if (List.mem s bound) then free else s::free
+| MVar [] -> free
+| MVar(s::_) -> if (List.mem s bound) then free else s::free
 | Call(e, es) -> List.fold_left (get_free bound) free @@ e::es
 | If(e1, e2, e3) -> List.fold_left (get_free bound) free [e1; e2; e3]
 | Cond(ees) ->

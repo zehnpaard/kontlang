@@ -70,6 +70,16 @@ let eval env cont = function
   let contv = Val.Cont(s, env', cont') in
   let closure = (s, contv)::fvals in
   Eval(Env.extend_list closure env'', []::cont'', e)
+| Exp.Define _ -> failwith "Define used outside of Module definition"
+| Exp.Module(Exp.Define(s, e)::es) ->
+  let env' = []::env in
+  let cont' = Cont.add (Cont.ModuleDefine(s, es, [])) @@ Cont.add Cont.Env cont in
+  Eval(env', cont', e)
+| Exp.Module(e::es) ->
+  let env' = []::env in
+  let cont' = Cont.add (Cont.ModuleExp(es, [])) @@ Cont.add Cont.Env cont in
+  Eval(env', cont', e)
+| Exp.Module [] -> ApplyCont(env, cont, Val.Module [])
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
@@ -127,6 +137,24 @@ let apply_cont env cont v = match cont with
     let cont''' = Cont.add (Cont.Do es) (cont'::cont'') in
     Eval(env, cont''', e)
 | (Cont.Do([])::cont')::cont'' -> ApplyCont(env, cont'::cont'', v)
+| (Cont.ModuleDefine(s, [], svs)::cont')::cont'' ->
+    ApplyCont(env, cont'::cont'', Val.Module((s, v)::svs))
+| (Cont.ModuleDefine(s, Exp.Define(s', e')::es, svs)::cont')::cont'' ->
+    let env' = Env.extend_current s v env in
+    let cont''' = Cont.add (Cont.ModuleDefine(s', es, (s,v)::svs)) (cont'::cont'')in
+    Eval(env', cont''', e')
+| (Cont.ModuleDefine(s, e::es, svs)::cont')::cont'' ->
+    let env' = Env.extend_current s v env in
+    let cont''' = Cont.add (Cont.ModuleExp(es, (s,v)::svs)) (cont'::cont'')in
+    Eval(env', cont''', e)
+| (Cont.ModuleExp([], svs)::cont')::cont'' ->
+    ApplyCont(env, cont'::cont'', Val.Module svs)
+| (Cont.ModuleExp(Exp.Define(s', e')::es, svs)::cont')::cont'' ->
+    let cont''' = Cont.add (Cont.ModuleDefine(s', es, svs)) (cont'::cont'')in
+    Eval(env, cont''', e')
+| (Cont.ModuleExp(e::es, svs)::cont')::cont'' ->
+    let cont''' = Cont.add (Cont.ModuleExp(es, svs)) (cont'::cont'')in
+    Eval(env, cont''', e)
 | (Cont.Env :: cont')::cont'' -> ApplyCont (Env.rest env, cont'::cont'', v)
 
 let rec trampoline = function

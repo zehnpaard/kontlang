@@ -10,6 +10,17 @@ let rec tco env = function
 let eval env cont = function
 | Exp.Int n -> ApplyCont(env, cont, Val.Int n)
 | Exp.Var s -> ApplyCont(env, cont, Env.find s env)
+| Exp.MVar([]) -> failwith "Evaluating invalid/empty module var"
+| Exp.MVar(s::ss) ->
+  let m = Env.find s env in
+  let f m s = match m with
+  | Val.Module svs -> (match List.assoc_opt s svs with
+    | Some n -> n
+    | None -> failwith @@ Printf.sprintf "Member %s of module does not exist" s)
+  | _ -> failwith @@ "Accessing member of non-module"
+  in
+  let v = List.fold_left f m ss in
+  ApplyCont(env, cont, v)
 | Exp.Str s -> ApplyCont(env, cont, Val.Str s)
 | Exp.Call(e, es) ->
   let cont' = Cont.add (Cont.Call(es, [])) cont in

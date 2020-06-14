@@ -9,5 +9,6 @@
     test_cond
     test_side_effect
     test_macro
-    test_module)
+    test_module
+    test_stdlib_list)
   (libraries ounit2 kontlang))

@@ -19,6 +19,22 @@ let test_map2 _ =
   let s = "(Stdlib.List.map (fn [x] (* x x)) nil)" in
   assert_equal (Execute.eval_string s) "nil"
 
+let test_filter1 _ =
+  let s = "(Stdlib.List.filter (fn [x] (< x 3)) (list 1 4 3 2 0))" in
+  assert_equal (Execute.eval_string s) "(1 2 0)"
+
+let test_filter2 _ =
+  let s = "(Stdlib.List.filter (fn [x] (< x 3)) (list 1 0 1 2 0))" in
+  assert_equal (Execute.eval_string s) "(1 0 1 2 0)"
+
+let test_filter3 _ =
+  let s = "(Stdlib.List.filter (fn [x] (< x 3)) (list 3 4 4 5 6))" in
+  assert_equal (Execute.eval_string s) "nil"
+
+let test_filter4 _ =
+  let s = "(Stdlib.List.filter (fn [x] (< x 3)) nil)" in
+  assert_equal (Execute.eval_string s) "nil"
+
 let test_fold_left1 _ =
   let s = "(Stdlib.List.fold_left (fn [x y] (+ (* 10 x) y)) 0 (list 1 2 3))" in
   assert_equal (Execute.eval_string s) "123"
@@ -53,6 +69,10 @@ let suite =
   ; "test_rev2" >:: test_rev2
   ; "test_map1" >:: test_map1
   ; "test_map2" >:: test_map2
+  ; "test_filter1" >:: test_filter1
+  ; "test_filter2" >:: test_filter2
+  ; "test_filter3" >:: test_filter3
+  ; "test_filter4" >:: test_filter4
   ; "test_fold_left1" >:: test_fold_left1
   ; "test_fold_left2" >:: test_fold_left2
   ; "test_range1" >:: test_range1

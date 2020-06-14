@@ -18,6 +18,18 @@
       (g f xs nil))]
     map))
 
+(define filter
+  (letfn [filter [f xs]
+    (letrec [g [f xs acc]
+      (if (nil? xs)
+        (rev acc)
+        (g f (cdr xs)
+             (if (f (car xs))
+               (cons (car xs) acc)
+               acc)))]
+      (g f xs nil))]
+    filter))
+
 (define fold_left
   (letrec [fold_left [f x ys]
     (if (nil? ys)

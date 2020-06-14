@@ -19,6 +19,7 @@
 %token SHIFT
 %token DEFINE
 %token MODULE
+%token IMPORT
 %token EOF
 
 %start <Exp.t> f
@@ -52,6 +53,7 @@ expr :
 | LPAREN; RESET; e = expr; RPAREN { Exp.Reset e }
 | LPAREN; SHIFT; LBRACK; s = VAR; RBRACK; e = expr; RPAREN { Exp.Shift(s, e) }
 | LPAREN; MODULE; LBRACK; es = nonempty_list(module_expr); RBRACK; RPAREN { Exp.Module es }
+| LPAREN; IMPORT; e = expr; RPAREN { Exp.Import e }
 
 module_expr :
 | e = expr { e }

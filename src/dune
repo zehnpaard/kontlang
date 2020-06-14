@@ -4,4 +4,5 @@
 (ocamllex lexer)
  
 (library
-  (name kontlang))
+  (name kontlang)
+  (libraries extlib))

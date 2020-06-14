@@ -1,6 +1,8 @@
 open OUnit2
 open Kontlang
 
+let () = Unix.chdir "../../.."
+
 let test_macro1 _ =
   let s = "((macro [x] nil) (print (read)))" in
   assert_equal (Execute.eval_string s) "nil"

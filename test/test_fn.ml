@@ -1,6 +1,8 @@
 open OUnit2
 open Kontlang
 
+let () = Unix.chdir "../../.."
+
 let test_fn1 _ =
   let s = "((fn [x] (+ x x)) 5)" in
   assert_equal (Execute.eval_string s) "10"

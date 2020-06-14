@@ -1,6 +1,8 @@
 open OUnit2
 open Kontlang
 
+let () = Unix.chdir "../../.."
+
 let test_module1 _ =
   let s = "(let [M (module [(define x 10)])] M.x)" in
   assert_equal (Execute.eval_string s) "10"

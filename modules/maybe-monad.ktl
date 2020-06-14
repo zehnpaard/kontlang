@@ -1,0 +1,7 @@
+(define reify (macro [expr] (reset expr)))
+
+(define reflect
+  (letfn [reflect [m]
+    (shift [k]
+      (if (nil? m) m (k m)))]
+    reflect))

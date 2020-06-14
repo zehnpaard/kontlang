@@ -1,1 +1,3 @@
 (define List (import (concat Config.stdlib_path "list.ktl")))
+
+(define ListMonad (import (concat Config.stdlib_path "list-monad.ktl")))

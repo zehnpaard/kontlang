@@ -10,5 +10,6 @@
     test_side_effect
     test_macro
     test_module
-    test_stdlib_list)
+    test_stdlib_list
+    test_stdlib_list_monad)
   (libraries ounit2 kontlang))

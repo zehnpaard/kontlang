@@ -53,3 +53,14 @@
         [(f (car xs)) (car xs)]
         [true (find f (cdr xs))])]
       find))
+
+  (define merge
+    (letfn [merge [xss]
+      (letrec [f [xss acc]
+        (cond
+          [(nil? xss) (rev acc)]
+          [(nil? (car xss)) (f (cdr xss) acc)]
+          [true (f (cons (cdr (car xss)) (cdr xss))
+                   (cons (car (car xss)) acc))])]
+        (f xss nil))]
+      merge))

@@ -1,3 +1,4 @@
 (define List (import (concat Config.stdlib_path "list.ktl")))
 
+(define MaybeMonad (import (concat Config.stdlib_path "maybe-monad.ktl")))
 (define ListMonad (import (concat Config.stdlib_path "list-monad.ktl")))

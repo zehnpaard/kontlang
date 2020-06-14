@@ -91,6 +91,11 @@ let eval env cont = function
   let cont' = Cont.add (Cont.ModuleExp(es, [])) @@ Cont.add Cont.Env cont in
   Eval(env', cont', e)
 | Exp.Module [] -> ApplyCont(env, cont, Val.Module [])
+| Exp.Import s ->
+  let s' = Std.input_all (open_in s) in
+  let s'' = Printf.sprintf "(module [%s])" s' in
+  let e = Parser.f Lexer.f @@ Lexing.from_string s'' in
+  Eval(env, cont, e)
 
 let apply_cont env cont v = match cont with
 | [] -> Done v

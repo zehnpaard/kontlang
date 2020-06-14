@@ -91,11 +91,8 @@ let eval env cont = function
   let cont' = Cont.add (Cont.ModuleExp(es, [])) @@ Cont.add Cont.Env cont in
   Eval(env', cont', e)
 | Exp.Module [] -> ApplyCont(env, cont, Val.Module [])
-| Exp.Import s ->
-  let s' = Std.input_all (open_in s) in
-  let s'' = Printf.sprintf "(module [%s])" s' in
-  let e = Parser.f Lexer.f @@ Lexing.from_string s'' in
-  Eval(env, cont, e)
+| Exp.Import e -> Eval(env, Cont.add Cont.Import cont, e)
+
 
 let apply_cont env cont v = match cont with
 | [] -> Done v
@@ -171,17 +168,31 @@ let apply_cont env cont v = match cont with
 | (Cont.ModuleExp(e::es, svs)::cont')::cont'' ->
     let cont''' = Cont.add (Cont.ModuleExp(es, svs)) (cont'::cont'')in
     Eval(env, cont''', e)
+| (Cont.Import :: cont')::cont'' -> (match v with
+  | Val.Str s ->
+    let s' = Std.input_all (open_in s) in
+    let s'' = Printf.sprintf "(module [%s])" s' in
+    let e = Parser.f Lexer.f @@ Lexing.from_string s'' in
+    Eval(env, cont'::cont'', e)
+  | _ -> failwith "Non-string passed to Import")
 | (Cont.Env :: cont')::cont'' -> ApplyCont (Env.rest env, cont'::cont'', v)
+
+let wrap_s s =
+  Printf.sprintf
+  "(let* [(Config (import \"config.ktl\"))
+          (Stdlib (import (concat Config.stdlib_path \"stdlib.ktl\")))]
+     (reset %s))" s
 
 let rec trampoline = function
 | Done v -> v
 | Eval(env, cont, e) -> trampoline @@ eval env cont e
 | ApplyCont(env, cont, v) -> trampoline @@ apply_cont env cont v
 
-let run e = trampoline @@ Eval(Builtins.load Env.empty, Cont.final, Exp.Reset e)
+let run e = trampoline @@ Eval(Builtins.load Env.empty, Cont.final, e)
 
 let eval_string s =
-  Lexing.from_string s
+  wrap_s s
+  |> Lexing.from_string
   |> Parser.f Lexer.f
   |> run
   |> Val.to_string
@@ -209,10 +220,11 @@ let rec trampoline' res = match res with
 | Eval(env, cont, e) -> display res; trampoline' @@ eval env cont e
 | ApplyCont(env, cont, v) -> display res; trampoline' @@ apply_cont env cont v
 
-let run' e = trampoline' @@ Eval(Builtins.load Env.empty, Cont.final, Exp.Reset e)
+let run' e = trampoline' @@ Eval(Builtins.load Env.empty, Cont.final, e)
 
 let eval_string' s =
-  Lexing.from_string s
+  wrap_s s
+  |> Lexing.from_string
   |> Parser.f Lexer.f
   |> run'
   |> Val.to_string

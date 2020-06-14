@@ -17,7 +17,7 @@ type t =
 | Shift of string * t
 | Define of string * t
 | Module of t list
-| Import of string
+| Import of t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -62,7 +62,7 @@ let rec to_string = function
 | Shift(s, e) -> Printf.sprintf "(shift [%s] %s)" s @@ to_string e
 | Define(s, e) -> Printf.sprintf "(define %s %s)" s @@ to_string e
 | Module es -> Printf.sprintf "(module [%s])" @@ String.concat " " @@ List.map to_string es
-| Import s -> Printf.sprintf "(import \"%s\"" s
+| Import e -> Printf.sprintf "(import \"%s\")" @@ to_string e
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "

@@ -4,7 +4,7 @@ let char = ['a'-'z' 'A'-'Z' '+' '-' '*' '/' '<' '>' '=' '!' '?' '_']
 let number = ('0'|['1'-'9'] digit*)
 let variable = char (char|digit)*
 let mvariable = variable '.' variable ('.' variable)*
-let string = '"' + (' '|char|number)* '"'
+let string = '"' + (' '|char|number|'.'|'\\')* '"'
 
 rule f = parse
   | whitespace* { f lexbuf }

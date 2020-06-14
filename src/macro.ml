@@ -26,6 +26,6 @@ let substitute e ss es =
   | Exp.Shift(s, e) -> Exp.Shift(s, f e)
   | Exp.Define(s, e) -> Exp.Define(s, f e)
   | Exp.Module es -> Exp.Module (List.map f es)
-  | Exp.Import _ as x -> x
+  | Exp.Import e -> Exp.Import (f e)
 in
 f e

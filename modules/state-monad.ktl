@@ -1,0 +1,21 @@
+(define reify
+  (macro [expr]
+    (reset
+      (let [result expr]
+        (fn [state] (cons result state))))))
+
+(define get
+  (letfn [get []
+    (shift [k]
+      (fn [state] ((k state) state)))]
+    get))
+
+(define put
+  (letfn [put [val]
+    (shift [k]
+      (fn [state] ((k nil) val)))]
+    put))
+
+(define run_state
+  (letfn [run_state [m state] (m state)]
+    run_state))

@@ -2,3 +2,4 @@
 
 (define MaybeMonad (import (concat Config.stdlib_path "maybe-monad.ktl")))
 (define ListMonad (import (concat Config.stdlib_path "list-monad.ktl")))
+(define StateMonad (import (concat Config.stdlib_path "state-monad.ktl")))

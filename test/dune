@@ -12,5 +12,6 @@
     test_module
     test_stdlib_list
     test_stdlib_list_monad
-    test_stdlib_maybe_monad)
+    test_stdlib_maybe_monad
+    test_stdlib_state_monad)
   (libraries ounit2 kontlang))

@@ -1,0 +1,43 @@
+(define rev
+  (letfn [rev [xs]
+    (letrec [f [xs acc]
+      (if (nil? xs)
+        acc
+        (f (cdr xs)
+           (cons (car xs) acc)))]
+      (f xs nil))]
+    rev))
+
+(define map
+  (letfn [map [f xs]
+    (letrec [g [f xs acc]
+      (if (nil? xs)
+        (rev acc)
+        (g f (cdr xs)
+             (cons (f (car xs)) acc)))]
+      (g f xs nil))]
+    map))
+
+(define fold_left
+  (letrec [fold_left [f x ys]
+    (if (nil? ys)
+      x
+      (fold_left f (f x (car ys)) (cdr ys)))]
+    fold_left))
+
+(define range
+  (letfn [range [x]
+    (letrec [f [x acc]
+      (if (< x 0)
+        acc
+        (f (- x 1) (cons x acc)))]
+      (f (- x 1) nil))]
+  range))
+
+  (define find
+    (letrec [find [f xs]
+      (cond
+        [(nil? xs) nil]
+        [(f (car xs)) (car xs)]
+        [true (find f (cdr xs))])]
+      find))

@@ -1,6 +1,8 @@
 open OUnit2
 open Kontlang
 
+let () = Unix.chdir "../../.."
+
 let test_true _ =
   assert_equal (Execute.eval_string "true") "true"
 

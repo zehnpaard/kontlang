@@ -1,6 +1,8 @@
 open OUnit2
 open Kontlang
 
+let () = Unix.chdir "../../.."
+
 let test_letrec1 _ =
   let s = "(letrec [f [x y] (if (= y 0) 0 (+ x (f x (- y 1))))] (f 5 5))" in
   assert_equal (Execute.eval_string s) "25"

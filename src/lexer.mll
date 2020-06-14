@@ -27,6 +27,7 @@ rule f = parse
   | "shift" { Parser.SHIFT }
   | "define" { Parser.DEFINE }
   | "module" { Parser.MODULE }
+  | "import" { Parser.IMPORT }
   | mvariable as s { Parser.MVAR (String.split_on_char '.' s) }
   | variable as s { Parser.VAR s }
   | eof { EOF }

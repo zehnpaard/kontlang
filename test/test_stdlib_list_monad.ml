@@ -9,7 +9,7 @@ let test_lm1 _ =
     (L.reify
       (let [(x (L.reflect (list 1 2)))
             (y (L.reflect (list 3 4)))]
-        (L.return (cons x y)))))
+        (cons x y))))
   " in
   assert_equal (Execute.eval_string s) "((1 . 3) (1 . 4) (2 . 3) (2 . 4))"
 
@@ -23,8 +23,8 @@ let test_lm2 _ =
         (if (= (* z z)
                (+ (* x x)
                   (* y y)))
-          (L.return (list x y z))
-          nil))))
+          (list x y z)
+          (L.fail)))))
   " in
   assert_equal (Execute.eval_string s) "((3 4 5) (4 3 5))"
 

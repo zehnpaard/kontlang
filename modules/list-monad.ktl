@@ -1,9 +1,14 @@
-(define reify (macro [expr] (reset expr)))
+(define reify (macro [expr] (reset (list expr))))
 
 (define reflect
   (letfn [reflect [m]
     (shift [k]
       (List.merge (List.map k m)))]
     reflect))
+
+(define fail
+  (letfn [fail []
+    (reflect nil)]
+    fail))
 
 (define return list)

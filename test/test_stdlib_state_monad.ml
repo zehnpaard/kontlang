@@ -53,6 +53,24 @@ let test_tick _ =
   " in
   assert_equal (Execute.eval_string s) "(1 . 3)"
 
+let test_tick2 _ =
+  let s = "
+  (let [S Stdlib.StateMonad]
+    (S.run_state
+      (S.reify
+        (let* [(tick
+                 (fn []
+                   (S.reflect
+                     (fn [state] (cons nil (+ state 1))))))
+               (_ (tick))
+               (_ (tick))
+               (a (S.get))
+               (_ (tick))]
+           (- (S.get) a)))
+      0))
+  " in
+  assert_equal (Execute.eval_string s) "(1 . 3)"
+
 let suite =
   "StdlibStateMonadTestList" >::: [
     "test_mm1" >:: test_mm1
@@ -61,6 +79,7 @@ let suite =
   ; "test_put_get" >:: test_put_get
   ; "test_get_put" >:: test_get_put
   ; "test_tick" >:: test_tick
+  ; "test_tick2" >:: test_tick2
   ]
 
 let () =

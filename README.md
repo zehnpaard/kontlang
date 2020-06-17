@@ -1,8 +1,10 @@
 # kontlang
 Language with Clojure-like syntax and semantics based on EoPL + Shift/Reset, implemented in OCaml
 
-# Language features
-Kontlang is a dynamically typed, purely functional (excluding the use of continuations) language interpreted with a CEK-machine-like evaluator, supporting the following features:
+## Language features
+Kontlang is a dynamically typed, purely functional (excluding the use of continuations) language interpreted with a CEK-machine-like evaluator, written in a trampolining defunctionalized continuation passing style.
+
+The language supports the following features:
 
 * `let`, `let*`, `letfn`, `letrec` (each supporting multiple variable bindings in one expression, and mutual recursion in the case of `letrec`)
 * lexical scope functions with closures
@@ -11,6 +13,7 @@ Kontlang is a dynamically typed, purely functional (excluding the use of continu
 * first class modules that can be imported from file
 * delimited continuations via the `shift` & `reset` operators
 * standard library modules including implementation of monads via `reify` and `reflect` operators
+* alternative step-wise evaluation interpreter showing expression/value, environment, and continuation at each step
 
 ## Instructions for use
 Recommendation for installing dependencies is [`OPAM`](https://opam.ocaml.org), the defacto standard OCaml package manager.
@@ -37,8 +40,7 @@ or
 dune exec ./stepwise.exe
 ```
 
-
-# Example programs
+## Example programs
 
 Based on examples and exercises from ["Introduction to Programming with Shift and Reset"](http://pllab.is.ocha.ac.jp/~asai/cw2011tutorial/main-e.pdf) together with `reify` and `reflect` operators as defined in Andrzej Filinski's Representing Monads paper.
 

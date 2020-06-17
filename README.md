@@ -42,7 +42,7 @@ dune exec ./stepwise.exe
 
 ## Example programs
 
-Based on examples and exercises from ["Introduction to Programming with Shift and Reset"](http://pllab.is.ocha.ac.jp/~asai/cw2011tutorial/main-e.pdf) together with `reify` and `reflect` operators as defined in Andrzej Filinski's Representing Monads paper.
+Based on examples and exercises from ["Introduction to Programming with Shift and Reset"](http://pllab.is.ocha.ac.jp/~asai/cw2011tutorial/main-e.pdf) together with `reify` and `reflect` operators as defined in Andrzej Filinski's "Representing Monads" paper.
 
 Non-deterministic search of numbers matching Pythagorus' Theorem
 
@@ -80,5 +80,7 @@ State monad:
 ```
 
 returns a tuple of the "result" and the final state `(1 . 3)`
+
+See `/modules/list-monad.ktl` and `/modules/state-monad.ktl` for definitions of the ListMonad and StateMonad modules.
 
 For more usage examples, see the `/test` directory.

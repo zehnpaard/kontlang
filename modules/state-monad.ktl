@@ -4,16 +4,26 @@
       (let [result expr]
         (fn [state] (cons result state))))))
 
+(define reflect
+  (letfn [reflect [f]
+    (shift [k]
+      (fn [state]
+        (let* [(val-state (f state))
+               (val (car val-state))
+               (state1 (cdr val-state))]
+          ((k val) state1))))]
+    reflect))
+
 (define get
   (letfn [get []
-    (shift [k]
-      (fn [state] ((k state) state)))]
+    (reflect
+      (fn [state] (cons state state)))]
     get))
 
 (define put
   (letfn [put [val]
-    (shift [k]
-      (fn [state] ((k nil) val)))]
+    (reflect
+      (fn [state] (cons nil val)))]
     put))
 
 (define run_state

@@ -7,8 +7,7 @@
     reflect))
 
 (define fail
-  (letfn [fail []
-    (reflect nil)]
+  (letfn [fail [] (reflect nil)]
     fail))
 
 (define return list)

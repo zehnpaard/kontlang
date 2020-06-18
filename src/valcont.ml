@@ -19,6 +19,7 @@ and contt =
 | ModuleExp of Exp.t list * (string * valt) list
 | ModuleDefine of string * Exp.t list * (string * valt) list
 | Import
+| Open of Exp.t
 | Env
 
 module Val = struct
@@ -80,6 +81,7 @@ module Cont = struct
   | ModuleExp of Exp.t list * (string * valt) list
   | ModuleDefine of string * Exp.t list * (string * valt) list
   | Import
+  | Open of Exp.t
   | Env
   
   type t = cont list list
@@ -128,6 +130,7 @@ module Cont = struct
       let svs_str = to_string_svs svs in
       Printf.sprintf "MODULE_DEFINE %s [%s] [%s]" s es_str svs_str
   | Import -> "IMPORT"
+  | Open(e) -> Printf.sprintf "OPEN %s" (Exp.to_string e)
   | Env -> "ENV"
 
   let to_string_cont_short = function
@@ -140,6 +143,7 @@ module Cont = struct
   | ModuleExp _ -> "MODULE_EXP"
   | ModuleDefine _ -> "MODULE_DEFINE"
   | Import -> "IMPORT"
+  | Open _ -> "OPEN"
   | Env -> "ENV"
 
   let to_string cont =

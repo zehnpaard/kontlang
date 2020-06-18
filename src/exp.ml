@@ -107,6 +107,9 @@ let rec get_free bound free = function
 | Reset e -> get_free bound free e
 | Shift(s, e) -> get_free (s::bound) free e
 | Define(_, e) -> get_free bound free e
-| Module [] -> free
-| Module((Define(s,e))::es) -> get_free (s::bound) (get_free bound free e) (Module es)
-| Module(e::es) -> get_free bound (get_free bound free e) (Module es)
+| Module es ->
+    let f (free, bound) = function
+    | Define(s,e) -> (get_free bound free e, s::bound)
+    | e -> (get_free bound free e, bound)
+    in
+    fst @@ List.fold_left f (free, bound) es

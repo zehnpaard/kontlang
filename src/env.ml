@@ -15,6 +15,13 @@ let rec find var = function
     if var = var' then val'
     else find var @@ env'::env''
 
+let rec find_opt var = function
+| [] -> None
+| []::env' -> find_opt var env'
+| ((var', val')::env')::env'' ->
+    if var = var' then Some val'
+    else find_opt var @@ env'::env''
+
 let pop = function
 | [] -> failwith "Popping empty environment"
 | svs::env -> svs, env

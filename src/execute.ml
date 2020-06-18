@@ -51,12 +51,12 @@ let eval env cont = function
 | Exp.Lets _ -> failwith "Evaluating empty Let"
 | Exp.Fn(params, body) as e ->
   let free = Utils.dedupe @@ Exp.get_free [] [] e in
-  let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
+  let fvalsr = ref @@ make_closure env free in
   ApplyCont(env, cont, Val.Fn("anon", params, fvalsr, body))
 | Exp.LetFn(fns, e) ->
   let f (fname, params, body) =
     let free = Utils.dedupe @@ Exp.get_free params [] body in
-    let fvalsr = ref @@ List.map (fun v -> v, Env.find v env) free in
+    let fvalsr = ref @@ make_closure env free in
     (fname, Val.Fn(fname, params, fvalsr, body))
   in
   Eval(Env.extend_list (List.map f fns) env, Cont.add Cont.Env cont, e)
@@ -64,8 +64,7 @@ let eval env cont = function
   let fnames, _, _ = Utils.split3 fns in
   let f (fname, params, body) =
     let free = Utils.dedupe @@ Exp.get_free (fnames @ params) [] body in
-    let fvals = List.map (fun v -> v, Env.find v env) free in
-    let fvalsr = ref fvals in
+    let fvalsr = ref @@ make_closure env free in
     let fn = Val.Fn(fname, params, fvalsr, body) in
     ((fname, fn), fvalsr)
   in
@@ -79,11 +78,11 @@ let eval env cont = function
 | Exp.Do([]) -> failwith "Evaluating empty do"
 | Exp.Reset e ->
   let free = Utils.dedupe @@ Exp.get_free [] [] e in
-  let fvals = List.map (fun v -> v, Env.find v env) free in
+  let fvals = make_closure env free in
   Eval(Env.extend_list fvals env, []::cont, e)
 | Exp.Shift(s, e) ->
   let free = Utils.dedupe @@ Exp.get_free [s] [] e in
-  let fvals = List.map (fun v -> v, Env.find v env) free in
+  let fvals = make_closure env free in
   let cont', cont'' = Cont.pop cont in
   let n = 1 + Utils.count Cont.Env cont' in
   let env', env'' = Utils.break_off n env in

@@ -3,6 +3,15 @@ type t =
 | Eval of Env.t * Cont.t * Exp.t
 | ApplyCont of Env.t * Cont.t * Val.t
 
+let make_closure env free =
+  let rec f acc = function
+  | [] -> List.rev acc
+  | s::ss -> (match Env.find_opt s env with
+    | None -> f acc ss
+    | Some v -> f ((s, v)::acc) ss)
+  in
+  f [] free
+
 let rec tco env = function
 | (Cont.Env::cont)::cont' -> tco (Env.rest env) @@ cont::cont'
 | cont -> env, cont

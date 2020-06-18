@@ -18,6 +18,7 @@ type t =
 | Define of string * t
 | Module of t list
 | Import of t
+| Open of t * t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -63,6 +64,7 @@ let rec to_string = function
 | Define(s, e) -> Printf.sprintf "(define %s %s)" s @@ to_string e
 | Module es -> Printf.sprintf "(module [%s])" @@ String.concat " " @@ List.map to_string es
 | Import e -> Printf.sprintf "(import \"%s\")" @@ to_string e
+| Open(m, e) -> Printf.sprintf "(open %s %s)" (to_string m) (to_string e)
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "
@@ -113,3 +115,4 @@ let rec get_free bound free = function
     | e -> (get_free bound free e, bound)
     in
     fst @@ List.fold_left f (free, bound) es
+| Open(m, e) -> get_free bound (get_free bound free m) e

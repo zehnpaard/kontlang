@@ -101,6 +101,7 @@ let eval env cont = function
 | Exp.Module [] -> ApplyCont(env, cont, Val.Module [])
 | Exp.Import e -> Eval(env, Cont.add Cont.Import cont, e)
 | Exp.Open(m, e) -> Eval(env, Cont.add (Cont.Open e) cont, m)
+| Exp.Include _ -> failwith "Include used outside of Module definition"
 
 
 let apply_cont env cont v = match cont with
@@ -165,6 +166,10 @@ let apply_cont env cont v = match cont with
     let env' = Env.extend_current s v env in
     let cont''' = Cont.add (Cont.ModuleDefine(s', es, (s,v)::svs)) (cont'::cont'')in
     Eval(env', cont''', e')
+| (Cont.ModuleDefine(s, Exp.Include(m)::es, svs)::cont')::cont'' ->
+    let env' = Env.extend_current s v env in
+    let cont''' = Cont.add (Cont.ModuleInclude(es, (s,v)::svs)) (cont'::cont'')in
+    Eval(env', cont''', m)
 | (Cont.ModuleDefine(s, e::es, svs)::cont')::cont'' ->
     let env' = Env.extend_current s v env in
     let cont''' = Cont.add (Cont.ModuleExp(es, (s,v)::svs)) (cont'::cont'')in
@@ -174,9 +179,39 @@ let apply_cont env cont v = match cont with
 | (Cont.ModuleExp(Exp.Define(s', e')::es, svs)::cont')::cont'' ->
     let cont''' = Cont.add (Cont.ModuleDefine(s', es, svs)) (cont'::cont'')in
     Eval(env, cont''', e')
+| (Cont.ModuleExp(Exp.Include(m)::es, svs)::cont')::cont'' ->
+    let cont''' = Cont.add (Cont.ModuleInclude(es, svs)) (cont'::cont'')in
+    Eval(env, cont''', m)
 | (Cont.ModuleExp(e::es, svs)::cont')::cont'' ->
     let cont''' = Cont.add (Cont.ModuleExp(es, svs)) (cont'::cont'')in
     Eval(env, cont''', e)
+| (Cont.ModuleInclude([], svs)::cont')::cont'' -> (match v with
+  | Val.Module _ -> ApplyCont(env, cont'::cont'', Val.Module svs)
+  | _ -> failwith "Non-module passed to Include")
+| (Cont.ModuleInclude(Exp.Define(s', e')::es, svs)::cont')::cont'' -> (match v with
+  | Val.Module svs' ->
+    let env' = Env.extend_list svs' env in
+    let cont1 = cont'::cont'' in
+    let cont2 = Cont.add Cont.Env cont1 in
+    let cont3 = Cont.add (Cont.ModuleDefine(s', es, svs)) cont2 in
+    Eval(env', cont3, e')
+  | _ -> failwith "Non-module passed to Include")
+| (Cont.ModuleInclude(Exp.Include(m)::es, svs)::cont')::cont'' -> (match v with
+  | Val.Module svs' ->
+    let env' = Env.extend_list svs' env in
+    let cont1 = cont'::cont'' in
+    let cont2 = Cont.add Cont.Env cont1 in
+    let cont3 = Cont.add (Cont.ModuleInclude(es, svs)) cont2 in
+    Eval(env', cont3, m)
+  | _ -> failwith "Non-module passed to Include")
+| (Cont.ModuleInclude(e::es, svs)::cont')::cont'' -> (match v with
+  | Val.Module svs' ->
+    let env' = Env.extend_list svs' env in
+    let cont1 = cont'::cont'' in
+    let cont2 = Cont.add Cont.Env cont1 in
+    let cont3 = Cont.add (Cont.ModuleExp(es, svs)) cont2 in
+    Eval(env', cont3, e)
+  | _ -> failwith "Non-module passed to Include")
 | (Cont.Import :: cont')::cont'' -> (match v with
   | Val.Str s ->
     let s' = Std.input_all (open_in s) in

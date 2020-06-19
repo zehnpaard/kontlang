@@ -100,6 +100,7 @@ let eval env cont = function
   Eval(env', cont', e)
 | Exp.Module [] -> ApplyCont(env, cont, Val.Module [])
 | Exp.Import e -> Eval(env, Cont.add Cont.Import cont, e)
+| Exp.Open(m, e) -> Eval(env, Cont.add (Cont.Open e) cont, m)
 
 
 let apply_cont env cont v = match cont with
@@ -183,6 +184,12 @@ let apply_cont env cont v = match cont with
     let e = Parser.f Lexer.f @@ Lexing.from_string s'' in
     Eval(env, cont'::cont'', e)
   | _ -> failwith "Non-string passed to Import")
+| (Cont.Open(e) :: cont')::cont'' -> (match v with
+  | Val.Module svs ->
+    let env' = Env.extend_list svs env in
+    let cont''' = Cont.add Cont.Env (cont'::cont'') in
+    Eval(env', cont''', e)
+  | _ -> failwith "Non-module passed to Open")
 | (Cont.Env :: cont')::cont'' -> ApplyCont (Env.rest env, cont'::cont'', v)
 
 let wrap_s s =

@@ -7,6 +7,9 @@ let extend_current var val_ = function
 | [] -> [[(var, val_)]]
 | env::env' -> ((var, val_)::env)::env'
 let extend_list vvs env = vvs :: env
+let extend_list_current vvs = function
+| [] -> [vvs]
+|env::env' -> (vvs @ env)::env'
 
 let rec find var = function
 | [] -> failwith @@ Printf.sprintf "Variable %s not found" var

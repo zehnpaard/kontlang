@@ -29,6 +29,7 @@ rule f = parse
   | "module" { Parser.MODULE }
   | "import" { Parser.IMPORT }
   | "open" { Parser.OPEN }
+  | "include" { Parser.INCLUDE }
   | mvariable as s { Parser.MVAR (String.split_on_char '.' s) }
   | variable as s { Parser.VAR s }
   | eof { EOF }

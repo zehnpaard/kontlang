@@ -57,11 +57,11 @@ expr :
 | LPAREN; MODULE; LBRACK; es = nonempty_list(module_expr); RBRACK; RPAREN { Exp.Module es }
 | LPAREN; IMPORT; e = expr; RPAREN { Exp.Import e }
 | LPAREN; OPEN; m = expr; e = expr; RPAREN { Exp.Open(m, e) }
-| LPAREN; INCLUDE; m = expr; RPAREN { Exp.Include m }
 
 module_expr :
 | e = expr { e }
 | LPAREN; DEFINE; s = VAR; e = expr; RPAREN { Exp.Define(s, e) }
+| LPAREN; INCLUDE; m = expr; RPAREN { Exp.Include m }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }

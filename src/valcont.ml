@@ -17,8 +17,11 @@ and contt =
 | Lets of string * (string * Exp.t) list * Exp.t
 | Do of Exp.t list
 | ModuleExp of Exp.t list * (string * valt) list
+| ModuleInclude of Exp.t list * (string * valt) list
+| ModuleUsing of Exp.t list * (string * valt) list
 | ModuleDefine of string * Exp.t list * (string * valt) list
 | Import
+| Open of Exp.t
 | Env
 
 module Val = struct
@@ -78,8 +81,11 @@ module Cont = struct
   | Lets of string * (string * Exp.t) list * Exp.t
   | Do of Exp.t list
   | ModuleExp of Exp.t list * (string * valt) list
+  | ModuleInclude of Exp.t list * (string * valt) list
+  | ModuleUsing of Exp.t list * (string * valt) list
   | ModuleDefine of string * Exp.t list * (string * valt) list
   | Import
+  | Open of Exp.t
   | Env
   
   type t = cont list list
@@ -123,11 +129,20 @@ module Cont = struct
       let es_str = to_string_es es in
       let svs_str = to_string_svs svs in
       Printf.sprintf "MODULE_EXP [%s] [%s]" es_str svs_str
+  | ModuleInclude(es, svs) ->
+      let es_str = to_string_es es in
+      let svs_str = to_string_svs svs in
+      Printf.sprintf "MODULE_INCLUDE [%s] [%s]" es_str svs_str
+  | ModuleUsing(es, svs) ->
+      let es_str = to_string_es es in
+      let svs_str = to_string_svs svs in
+      Printf.sprintf "MODULE_USING [%s] [%s]" es_str svs_str
   | ModuleDefine(s, es, svs) ->
       let es_str = to_string_es es in
       let svs_str = to_string_svs svs in
       Printf.sprintf "MODULE_DEFINE %s [%s] [%s]" s es_str svs_str
   | Import -> "IMPORT"
+  | Open(e) -> Printf.sprintf "OPEN %s" (Exp.to_string e)
   | Env -> "ENV"
 
   let to_string_cont_short = function
@@ -138,8 +153,11 @@ module Cont = struct
   | Lets _ -> "LETS"
   | Do _ -> "DO"
   | ModuleExp _ -> "MODULE_EXP"
+  | ModuleInclude _ -> "MODULE_INCLUDE"
+  | ModuleUsing _ -> "MODULE_USING"
   | ModuleDefine _ -> "MODULE_DEFINE"
   | Import -> "IMPORT"
+  | Open _ -> "OPEN"
   | Env -> "ENV"
 
   let to_string cont =

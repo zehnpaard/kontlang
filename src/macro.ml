@@ -27,5 +27,8 @@ let substitute e ss es =
   | Exp.Define(s, e) -> Exp.Define(s, f e)
   | Exp.Module es -> Exp.Module (List.map f es)
   | Exp.Import e -> Exp.Import (f e)
+  | Exp.Open(m, e) -> Exp.Open(f m, f e)
+  | Exp.Include m -> Exp.Include (f m)
+  | Exp.Using m -> Exp.Using (f m)
 in
 f e

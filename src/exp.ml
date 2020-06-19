@@ -18,6 +18,9 @@ type t =
 | Define of string * t
 | Module of t list
 | Import of t
+| Open of t * t
+| Include of t
+| Using of t
 
 let rec to_string = function
 | Int n -> string_of_int n
@@ -63,6 +66,9 @@ let rec to_string = function
 | Define(s, e) -> Printf.sprintf "(define %s %s)" s @@ to_string e
 | Module es -> Printf.sprintf "(module [%s])" @@ String.concat " " @@ List.map to_string es
 | Import e -> Printf.sprintf "(import \"%s\")" @@ to_string e
+| Open(m, e) -> Printf.sprintf "(open %s %s)" (to_string m) (to_string e)
+| Include m -> Printf.sprintf "(include %s)" (to_string m)
+| Using m -> Printf.sprintf "(using %s)" (to_string m)
 and to_string_ves ves =
   let f (s, e) = Printf.sprintf "(%s %s)" s (to_string e) in
   List.map f ves |> String.concat " "
@@ -107,6 +113,12 @@ let rec get_free bound free = function
 | Reset e -> get_free bound free e
 | Shift(s, e) -> get_free (s::bound) free e
 | Define(_, e) -> get_free bound free e
-| Module [] -> free
-| Module((Define(s,e))::es) -> get_free (s::bound) (get_free bound free e) (Module es)
-| Module(e::es) -> get_free bound (get_free bound free e) (Module es)
+| Module es ->
+    let f (free, bound) = function
+    | Define(s,e) -> (get_free bound free e, s::bound)
+    | e -> (get_free bound free e, bound)
+    in
+    fst @@ List.fold_left f (free, bound) es
+| Open(m, e) -> get_free bound (get_free bound free m) e
+| Include m -> get_free bound free m
+| Using m -> get_free bound free m

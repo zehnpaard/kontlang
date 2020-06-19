@@ -7,6 +7,9 @@ let extend_current var val_ = function
 | [] -> [[(var, val_)]]
 | env::env' -> ((var, val_)::env)::env'
 let extend_list vvs env = vvs :: env
+let extend_list_current vvs = function
+| [] -> [vvs]
+|env::env' -> (vvs @ env)::env'
 
 let rec find var = function
 | [] -> failwith @@ Printf.sprintf "Variable %s not found" var
@@ -14,6 +17,13 @@ let rec find var = function
 | ((var', val')::env')::env'' ->
     if var = var' then val'
     else find var @@ env'::env''
+
+let rec find_opt var = function
+| [] -> None
+| []::env' -> find_opt var env'
+| ((var', val')::env')::env'' ->
+    if var = var' then Some val'
+    else find_opt var @@ env'::env''
 
 let pop = function
 | [] -> failwith "Popping empty environment"

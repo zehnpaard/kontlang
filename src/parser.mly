@@ -20,6 +20,9 @@
 %token DEFINE
 %token MODULE
 %token IMPORT
+%token OPEN
+%token INCLUDE
+%token USING
 %token EOF
 
 %start <Exp.t> f
@@ -54,10 +57,13 @@ expr :
 | LPAREN; SHIFT; LBRACK; s = VAR; RBRACK; e = expr; RPAREN { Exp.Shift(s, e) }
 | LPAREN; MODULE; LBRACK; es = nonempty_list(module_expr); RBRACK; RPAREN { Exp.Module es }
 | LPAREN; IMPORT; e = expr; RPAREN { Exp.Import e }
+| LPAREN; OPEN; m = expr; e = expr; RPAREN { Exp.Open(m, e) }
 
 module_expr :
 | e = expr { e }
 | LPAREN; DEFINE; s = VAR; e = expr; RPAREN { Exp.Define(s, e) }
+| LPAREN; INCLUDE; m = expr; RPAREN { Exp.Include m }
+| LPAREN; USING; m = expr; RPAREN { Exp.Using m }
 
 var_exp :
 | LPAREN; v = VAR; e = expr; RPAREN { (v, e) }

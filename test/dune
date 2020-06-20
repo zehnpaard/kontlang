@@ -14,5 +14,6 @@
     test_stdlib_list_monad
     test_stdlib_maybe_monad
     test_stdlib_state_monad
-    test_include)
+    test_include
+    test_using)
   (libraries ounit2 kontlang))

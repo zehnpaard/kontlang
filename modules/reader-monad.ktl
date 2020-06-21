@@ -1,0 +1,23 @@
+(define reify
+  (macro [expr]
+    (reset
+      (let [result expr]
+        (fn [state] result)))))
+
+(define reflect
+  (letfn [reflect [f]
+    (shift [k]
+      (fn [state]
+        (let [val (f state)]
+          ((k val) state))))]
+    reflect))
+
+(define ask
+  (letfn [get []
+    (reflect
+      (fn [state] state))]
+    get))
+
+(define run_reader
+  (letfn [run_reader [m state] (m state)]
+    run_reader))

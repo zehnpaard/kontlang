@@ -13,10 +13,10 @@
     reflect))
 
 (define ask
-  (letfn [get []
+  (letfn [ask []
     (reflect
       (fn [state] state))]
-    get))
+    ask))
 
 (define run_reader
   (letfn [run_reader [m state] (m state)]

@@ -42,6 +42,8 @@ dune exec ./stepwise.exe
 
 ## Example programs
 
+### Monads
+
 Based on examples and exercises from ["Introduction to Programming with Shift and Reset"](http://pllab.is.ocha.ac.jp/~asai/cw2011tutorial/main-e.pdf) together with `reify` and `reflect` operators as defined in Andrzej Filinski's "Representing Monads" paper.
 
 Non-deterministic search of numbers matching Pythagorus' Theorem
@@ -84,3 +86,20 @@ returns a tuple of the "result" and the final state `(1 . 3)`
 See `/modules/list-monad.ktl` and `/modules/state-monad.ktl` for definitions of the ListMonad and StateMonad modules.
 
 For more usage examples, see the `/test` directory.
+
+### yin-yang puzzle
+
+```racket
+(reset
+  (let [(yin ((fn [k] (do [(print "x") k]))
+              (shift [k] (k k))))
+        (yang ((fn [k] (do [(print "_") k]))
+              (shift [k] (k k))))]
+    (yin yang)))
+```
+
+The above generates an infinite stream on stdout of the form
+
+```
+x_x__x___x____x_____x....
+```

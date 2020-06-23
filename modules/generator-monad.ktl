@@ -1,0 +1,14 @@
+(define reify (macro [expr]
+  (reset
+    (let [result expr]
+      (fn [] (cons result nil))))))
+
+(define reflect
+  (letfn [reflect [m]
+    (shift [k]
+      (Generator.merge (Generator.map k m)))]
+    reflect))
+
+(define fail
+  (letfn [fail [] (reflect (fn [] nil))]
+    fail))

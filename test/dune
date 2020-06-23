@@ -13,6 +13,7 @@
     test_stdlib_list
     test_stdlib_generator
     test_stdlib_list_monad
+    test_stdlib_generator_monad
     test_stdlib_maybe_monad
     test_stdlib_state_monad
     test_stdlib_reader_monad

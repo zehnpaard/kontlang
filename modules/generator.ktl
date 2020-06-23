@@ -1,0 +1,88 @@
+(define generator
+  (macro [expr]
+    (reset
+      (let [result expr]
+        (fn []
+          (cons result (fn [] nil)))))))
+
+(define yield
+  (letfn [yield [x]
+    (shift [k] (fn [] (cons x (k nil))))]
+    yield))
+
+(define countnm
+  (letrec [f [n m] (do [(yield n) (f (+ n m) m)])]
+    (letfn [countnm [n m] (generator (f n m))]
+      countnm)))
+
+(define countn
+  (letfn [countn [n] (countnm n 1)]
+    countn))
+    
+(define count
+  (letfn [count [] (countn 0)]
+    count))
+
+(define from_list
+  (letrec [from_list [xs]
+    (if (nil? xs)
+      (fn [] nil)
+      (fn []
+        (cons (car xs) (from_list (cdr xs)))))]
+    from_list))
+
+(define to_list
+  (letfn [to_list [gen]
+    (letrec [f [gen acc]
+      (let [x (gen)]
+        (if (nil? x) (List.rev acc)
+          (f (cdr x) (cons (car x) acc))))]
+      (f gen nil))]
+  to_list))
+
+(define map
+  (letrec [map [f gen]
+    (fn []
+      (let [x (gen)]
+        (if (nil? x)
+          nil
+          (cons (f (car x)) (map f (cdr x))))))]
+    map))
+
+(define concat
+  (letrec [concat [gen1 gen2]
+    (fn []
+      (let [x (gen1)]
+        (if (nil? x)
+          (gen2)
+          (cons (car x) (concat (cdr x) gen2)))))]
+    concat))
+
+(define merge
+  (letrec [merge [gen]
+    (fn []
+      (let [x (gen)]
+        (if (nil? x)
+          nil
+          ((concat (car x) (merge (cdr x)))))))]
+    merge))
+
+(define take
+  (letrec [take [n gen]
+    (fn []
+      (let [x (gen)]
+        (cond
+          [(= 0 n) nil]
+          [(nil? x) nil]
+          [true (cons (car x) (take (- n 1) (cdr x)))])))]
+    take))
+
+(define drop
+  (letrec [drop [n gen]
+    (if (= 0 n)
+      gen
+      (let [x (gen)]
+        (if (nil? x)
+          (fn [] nil)
+          (drop (- n 1) (cdr x)))))]
+    drop))

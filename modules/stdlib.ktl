@@ -4,3 +4,4 @@
 (define ListMonad (import (concat Config.stdlib_path "list-monad.ktl")))
 (define StateMonad (import (concat Config.stdlib_path "state-monad.ktl")))
 (define ReaderMonad (import (concat Config.stdlib_path "reader-monad.ktl")))
+(define WriterMonad (import (concat Config.stdlib_path "writer-monad.ktl")))

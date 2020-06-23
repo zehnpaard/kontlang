@@ -1,0 +1,20 @@
+(define make
+  (macro [f unit] (module [
+    (define reify
+      (macro [expr]
+        (reset (cons expr unit))))
+    
+    (define reflect
+      (letfn [reflect [v]
+        (shift [k]
+          (let* [(val (k (car v)))
+                 (x (car val))
+                 (y (cdr val))]
+            (cons x (f (cdr v) y))))]
+        reflect))
+
+    (define tell
+      (letfn [tell [x]
+        (reflect (cons nil x))]
+        tell))
+  ])))

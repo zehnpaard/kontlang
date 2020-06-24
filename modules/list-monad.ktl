@@ -10,4 +10,7 @@
   (letfn [fail [] (reflect nil)]
     fail))
 
-(define return list)
+(define assert
+  (letfn [assert [x]
+    (if x nil (fail))]
+    assert))

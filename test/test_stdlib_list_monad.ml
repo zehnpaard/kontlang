@@ -28,11 +28,24 @@ let test_lm2 _ =
   " in
   assert_equal (Execute.eval_string s) "((3 4 5) (4 3 5))"
 
+let test_lm3 _ =
+  let s = "
+  (let [L Stdlib.ListMonad]
+    (L.reify
+      (let* [(x (L.reflect (list 1 2 3 4 5)))
+             (y (L.reflect (list 1 2 3 4 5)))
+             (z (L.reflect (list 1 2 3 4 5)))
+             (_ (L.assert  (= (* z z)
+                              (+ (* x x) (* y y)))))]
+        (list x y z))))
+  " in
+  assert_equal (Execute.eval_string s) "((3 4 5) (4 3 5))"
 
 let suite =
   "StdlibListMonadTestList" >::: [
     "test_lm1" >:: test_lm1
   ; "test_lm2" >:: test_lm2
+  ; "test_lm3" >:: test_lm3
   ]
 
 let () =

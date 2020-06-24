@@ -1,7 +1,7 @@
 (define reify (macro [expr]
   (reset
     (let [result expr]
-      (fn [] (cons result nil))))))
+      (fn [] (cons result (fn [] nil)))))))
 
 (define reflect
   (letfn [reflect [m]

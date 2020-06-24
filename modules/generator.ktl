@@ -86,3 +86,19 @@
           (fn [] nil)
           (drop (- n 1) (cdr x)))))]
     drop))
+
+(define head
+  (letfn [head [gen]
+    (let [x (gen)]
+      (if (nil? x)
+        nil
+        (car x)))]
+    head))
+
+(define tail
+  (letfn [tail [gen]
+    (let [x (gen)]
+      (if (nil? x)
+        nil
+        (cdr x)))]
+    tail))

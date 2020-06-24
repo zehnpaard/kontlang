@@ -32,11 +32,26 @@ let test_gm2 _ =
   " in
   assert_equal (Execute.eval_string s) "(3 4 5)"
 
+let test_gm3 _ =
+  let s = "
+  (let* [(G Stdlib.Generator)
+         (GM Stdlib.GeneratorMonad)
+         (g (GM.reify
+           (let* [(x (GM.reflect (G.take 5 (G.countn 1))))
+                  (y (GM.reflect (G.take 5 (G.countn 1))))
+                  (z (GM.reflect (G.take 5 (G.countn 1))))
+                  (_ (GM.assert (= (* z z)
+                                   (+ (* x x) (* y y)))))]
+             (list x y z))))]
+    (car (g)))
+  " in
+  assert_equal (Execute.eval_string s) "(3 4 5)"
 
 let suite =
   "StdlibGeneratorMonadTestList" >::: [
     "test_gm1" >:: test_gm1
   ; "test_gm2" >:: test_gm2
+  ; "test_gm3" >:: test_gm3
   ]
 
 let () =

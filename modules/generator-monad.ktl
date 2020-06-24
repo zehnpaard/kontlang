@@ -12,3 +12,8 @@
 (define fail
   (letfn [fail [] (reflect (fn [] nil))]
     fail))
+
+(define assert
+  (letfn [assert [x]
+    (if x nil (fail))]
+    assert))

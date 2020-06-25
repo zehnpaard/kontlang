@@ -5,20 +5,22 @@ let () = Unix.chdir "../../.."
 
 let test_mm1 _ =
   let s = "
-  (let [M Stdlib.MaybeMonad]
+  (let [(M Stdlib.MaybeMonad)
+        (L Stdlib.List)]
     (M.reify
-      (let [(x (M.reflect (Stdlib.List.find (fn [x] (= x 2)) (list 1 0 3))))
-            (y (M.reflect (Stdlib.List.find (fn [x] (= x 3)) (list 1 2 3))))]
+      (let [(x (M.reflect (L.find (fn [x] (= x 2)) (list 1 0 3))))
+            (y (M.reflect (L.find (fn [x] (= x 3)) (list 1 2 3))))]
         (cons x y))))
   " in
   assert_equal (Execute.eval_string s) "nil"
 
 let test_mm2 _ =
   let s = "
-  (let [M Stdlib.MaybeMonad]
+  (let [(M Stdlib.MaybeMonad)
+        (L Stdlib.List)]
     (M.reify
-      (let [(x (M.reflect (Stdlib.List.find (fn [x] (= x 2)) (list 1 2 3))))
-            (y (M.reflect (Stdlib.List.find (fn [x] (= x 3)) (list 1 2 3))))]
+      (let [(x (M.reflect (L.find (fn [x] (= x 2)) (list 1 2 3))))
+            (y (M.reflect (L.find (fn [x] (= x 3)) (list 1 2 3))))]
         (cons x y))))
   " in
   assert_equal (Execute.eval_string s) "(2 . 3)"

@@ -1,5 +1,6 @@
 (define List (import (concat Config.stdlib_path "list.ktl")))
 (define Generator (import (concat Config.stdlib_path "generator.ktl")))
+(define Coroutine (import (concat Config.stdlib_path "coroutine.ktl")))
 
 (define MaybeMonad (import (concat Config.stdlib_path "maybe-monad.ktl")))
 (define ListMonad (import (concat Config.stdlib_path "list-monad.ktl")))

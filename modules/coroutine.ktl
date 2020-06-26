@@ -1,0 +1,11 @@
+(define coroutine
+  (macro [expr]
+    (reset
+      (let [result expr]
+        (fn [_]
+          (cons result (fn [_] nil)))))))
+
+(define yield
+  (letfn [yield [x]
+    (shift [k] (fn [y] (cons x (k y))))]
+    yield))

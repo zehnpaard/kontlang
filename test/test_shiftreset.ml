@@ -39,6 +39,39 @@ let test_sr4 _ =
   " in
   assert_equal (Execute.eval_string s) "11"
 
+let test_sr_fn1 _ =
+  let s = "
+  (letfn [f [] (shift [k] 1)]
+    (reset (f)))
+  " in
+  assert_equal (Execute.eval_string s) "1"
+
+let test_sr_fn2 _ =
+  let s = "
+  (letfn [f [] (shift [k] 1)]
+    (reset
+      (+ 10 (f))))
+  " in
+  assert_equal (Execute.eval_string s) "1"
+
+let test_sr_fn3 _ =
+  let s = "
+  (letfn [f [] (shift [k] (k 1))]
+    (reset
+      (+ 10 (f))))
+  " in
+  assert_equal (Execute.eval_string s) "11"
+
+let test_sr_fn4 _ =
+  let s = "
+  (letfn [f [] (shift [k] k)]
+    ((reset
+       (+ 10 (f)))
+     1))
+  " in
+  assert_equal (Execute.eval_string s) "11"
+
+
 let test_multi_shift1 _ =
   let s = "
   (let [f (reset
@@ -76,6 +109,10 @@ let suite =
   ; "test_sr2" >:: test_sr2
   ; "test_sr3" >:: test_sr3
   ; "test_sr4" >:: test_sr4
+  ; "test_sr_fn1" >:: test_sr_fn1
+  ; "test_sr_fn2" >:: test_sr_fn2
+  ; "test_sr_fn3" >:: test_sr_fn3
+  ; "test_sr_fn4" >:: test_sr_fn4
   ; "test_multi_shift1" >:: test_multi_shift1
   ; "test_acc1" >:: test_acc1
   ]

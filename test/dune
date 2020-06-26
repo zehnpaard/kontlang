@@ -13,6 +13,7 @@
     test_shiftreset
     test_stdlib_list
     test_stdlib_generator
+    test_stdlib_coroutine
     test_stdlib_list_monad
     test_stdlib_generator_monad
     test_stdlib_maybe_monad

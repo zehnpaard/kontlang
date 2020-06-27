@@ -20,11 +20,31 @@ let test_nested_module1 _ =
   in
   assert_equal (Execute.eval_string s) "15"
 
+let test_functor1 _ =
+  let s = "
+  (let* [(X (module [(define x 1)]))
+         (F (fn [M] (module [(define y M.x)])))
+         (Y (F X))]
+    Y.y)
+  " in
+  assert_equal (Execute.eval_string s) "1"
+
+let test_functor2 _ =
+  let s = "
+  (let* [(X (module [(define x 1)]))
+         (F (fn [M] (module [(define M M)])))
+         (Y (F X))]
+    Y.M.x)
+  " in
+  assert_equal (Execute.eval_string s) "1"
+
 let suite =
   "MacroTestList" >::: [
     "test_module1" >:: test_module1
   ; "test_module2" >:: test_module2
   ; "test_nested_module1" >:: test_nested_module1
+  ; "test_functor1" >:: test_functor1
+  ; "test_functor2" >:: test_functor2
   ]
 
 let () =

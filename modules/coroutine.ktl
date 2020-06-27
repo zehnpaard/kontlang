@@ -8,3 +8,20 @@
   (letfn [yield [x]
     (shift [k] (cons x k))]
     yield))
+
+(define start
+  (letfn [start [c]
+    (c)]
+    start))
+
+(define send
+  (letfn [send [c x]
+    ((cdr c) x)]
+  send))
+
+(define val
+  (letfn [val [c]
+    (if (cons? c)
+      (car c)
+      nil)]
+    val))

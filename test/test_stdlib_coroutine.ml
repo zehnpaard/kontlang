@@ -57,6 +57,18 @@ let test_multi_cr2 _ =
   " in
   assert_equal (Execute.eval_string s) "nil"
 
+let test_rec_cr1 _ =
+  let s = "
+  (let [(C Stdlib.Coroutine)]
+    (letrec [f [x] (f (+ x (C.yield x)))]
+      (let* [(c (C.coroutine (f 0)))
+             (c (cdr (c)))
+             (c (cdr (c 1)))
+             (c (cdr (c 2)))]
+        (car (c 3)))))
+  " in
+  assert_equal (Execute.eval_string s) "6"
+
 let suite =
   "CoroutineTestList" >::: [
     "test_cr1" >:: test_cr1
@@ -64,6 +76,7 @@ let suite =
   ; "test_cr3" >:: test_cr3
   ; "test_multi_cr1" >:: test_multi_cr1
   ; "test_multi_cr2" >:: test_multi_cr2
+  ; "test_rec_cr1" >:: test_rec_cr1
   ]
 
 let () =
